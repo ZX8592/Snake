@@ -9,14 +9,16 @@
             flex-direction: row;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
             background: url('https://img.freepik.com/free-vector/gradient-pastel-sky-background_23-2148917404.jpg') no-repeat center center fixed;
             background-size: cover;
             font-family: 'Arial', sans-serif;
             color: #fff;
             position: relative;
-            overflow: hidden;
+            overflow: auto;
+            box-sizing: border-box;
         }
 
         body::before {
@@ -35,15 +37,14 @@
             flex-direction: column;
             align-items: center;
             margin: 0;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
+            position: relative;
             background: rgba(255, 255, 255, 0.15);
             padding: 20px;
             border-radius: 15px;
             backdrop-filter: blur(8px);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
+            box-sizing: border-box;
         }
 
         #gameCanvas {
@@ -500,45 +501,32 @@
         /* 移动设备适配 */
         @media screen and (max-width: 768px) {
             body {
-                flex-direction: column;
                 padding: 10px;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
+
+            .mobile-layout {
+                padding: 10px 0;
             }
 
             #gameContainer {
-                position: relative;
-                left: 0;
-                transform: none;
                 width: 100%;
                 max-width: 400px;
-                padding: 10px;
+                margin: 0 auto;
             }
 
-            #gameCanvas {
-                width: 100%;
-                height: auto;
-                max-width: 400px;
-            }
-
-            #settingsPanel {
-                position: relative;
-                left: 0;
-                top: 0;
-                transform: none;
+            .controls-container {
                 width: 100%;
                 max-width: 400px;
-                margin: 10px 0;
-                box-sizing: border-box;
+                margin: 0 auto;
             }
 
+            #settingsPanel,
             #highScores {
-                position: relative;
-                right: 0;
-                top: 0;
-                transform: none;
                 width: 100%;
                 max-width: 400px;
-                margin: 10px 0;
-                box-sizing: border-box;
+                margin: 0 auto;
             }
 
             #scoreBoard {
@@ -599,36 +587,41 @@
         /* 横屏模式优化 */
         @media screen and (max-width: 768px) and (orientation: landscape) {
             body {
+                padding: 10px;
+            }
+
+            .mobile-layout {
                 flex-direction: row;
-                justify-content: space-around;
-                align-items: center;
-                padding: 5px;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 10px;
             }
 
             #gameContainer {
                 flex: 0 0 auto;
-                margin-right: 10px;
+                margin: 0;
             }
 
             .controls-container {
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
                 flex: 0 0 auto;
-            }
-
-            #settingsPanel,
-            #highScores {
-                margin: 5px 0;
-                max-height: 80vh;
+                max-height: 100vh;
                 overflow-y: auto;
             }
         }
 
         /* 超小屏幕设备优化 */
         @media screen and (max-width: 320px) {
-            #gameContainer {
+            body {
                 padding: 5px;
+            }
+
+            .mobile-layout {
+                padding: 5px 0;
+            }
+
+            #gameContainer {
+                padding: 10px;
             }
 
             #scoreBoard {
@@ -646,6 +639,26 @@
             #gameOverDialog h2 {
                 font-size: 20px;
             }
+        }
+
+        .mobile-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 400px;
         }
     </style>
 </head>
