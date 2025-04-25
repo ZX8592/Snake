@@ -508,18 +508,21 @@
 
             .mobile-layout {
                 padding: 10px 0;
+                flex-direction: column;
             }
 
             #gameContainer {
                 width: 100%;
                 max-width: 400px;
                 margin: 0 auto;
+                order: 2; /* 将游戏区域放在中间 */
             }
 
             .controls-container {
                 width: 100%;
                 max-width: 400px;
                 margin: 0 auto;
+                order: 1; /* 将控制面板放在上面 */
             }
 
             #settingsPanel,
@@ -527,6 +530,7 @@
                 width: 100%;
                 max-width: 400px;
                 margin: 0 auto;
+                margin-bottom: 10px; /* 添加底部间距 */
             }
 
             #scoreBoard {
@@ -534,10 +538,16 @@
                 margin-bottom: 10px;
             }
 
+            /* 优化游戏结束对话框 */
             #gameOverDialog {
                 width: 90%;
                 max-width: 350px;
                 padding: 15px;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 1000;
             }
 
             .button-group {
@@ -548,6 +558,8 @@
             .button-group button {
                 width: 100%;
                 margin: 5px 0;
+                padding: 12px;
+                font-size: 16px;
             }
 
             #pauseText {
@@ -586,10 +598,6 @@
 
         /* 横屏模式优化 */
         @media screen and (max-width: 768px) and (orientation: landscape) {
-            body {
-                padding: 10px;
-            }
-
             .mobile-layout {
                 flex-direction: row;
                 justify-content: center;
@@ -599,11 +607,13 @@
             }
 
             #gameContainer {
+                order: 1;
                 flex: 0 0 auto;
                 margin: 0;
             }
 
             .controls-container {
+                order: 2;
                 flex: 0 0 auto;
                 max-height: 100vh;
                 overflow-y: auto;
@@ -1518,7 +1528,7 @@
             };
         }
 
-        // 生成分享图片
+        // 修改分享图片生成函数
         function generateShareImage() {
             const shareImageContainer = document.getElementById('shareImageContainer');
             const shareImage = document.getElementById('shareImage');
@@ -1585,6 +1595,9 @@
                     // 转换为图片并显示
                     shareImage.src = canvas.toDataURL('image/png');
                     shareImageContainer.style.display = 'block';
+                    
+                    // 滚动到分享图片位置
+                    shareImageContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 };
                 
                 const shareLink = `${window.location.href}?score=${score}&difficulty=${difficulty}`;
@@ -1601,25 +1614,53 @@
             }
         }
 
-        // 复制分享链接
+        // 修改复制分享链接函数
         function copyShareLink() {
             const difficulty = document.getElementById('difficultySelector').value;
             const shareLink = `${window.location.href}?score=${score}&difficulty=${difficulty}`;
             
-            navigator.clipboard.writeText(shareLink).then(() => {
-                // 显示复制成功提示
-                const tooltip = document.querySelector('.copy-tooltip');
-                tooltip.style.opacity = '1';
-                tooltip.style.background = 'rgba(40, 167, 69, 0.8)';
-                
-                // 2秒后隐藏提示
-                setTimeout(() => {
-                    tooltip.style.opacity = '0';
-                }, 2000);
-            }).catch(err => {
-                console.error('复制失败:', err);
+            // 使用新的剪贴板API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(shareLink).then(() => {
+                    showCopySuccess();
+                }).catch(err => {
+                    fallbackCopy(shareLink);
+                });
+            } else {
+                fallbackCopy(shareLink);
+            }
+        }
+
+        // 显示复制成功提示
+        function showCopySuccess() {
+            const tooltip = document.querySelector('.copy-tooltip');
+            tooltip.style.opacity = '1';
+            tooltip.style.background = 'rgba(40, 167, 69, 0.8)';
+            
+            setTimeout(() => {
+                tooltip.style.opacity = '0';
+            }, 2000);
+        }
+
+        // 备用复制方法
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopySuccess();
+            } catch (err) {
                 alert('复制失败，请手动复制链接');
-            });
+            }
+            
+            document.body.removeChild(textArea);
         }
     </script>
 </body>
