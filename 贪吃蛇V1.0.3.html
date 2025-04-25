@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>贪吃蛇游戏</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: url('https://img.freepik.com/free-vector/gradient-pastel-sky-background_23-2148917404.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        #gameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        #gameCanvas {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            display: block;
+            margin: 0 auto;
+        }
+
+        #scoreBoard {
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #settingsPanel {
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            min-width: 200px;
+            position: fixed;
+            left: 100px;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        #settingsPanel h3 {
+            margin: 0 0 15px 0;
+            text-align: center;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .setting-group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .setting-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .setting-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .setting-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .setting-group select option {
+            background: rgba(26, 42, 108, 0.9);
+            color: #fff;
+        }
+
+        .setting-group .upload-btn {
+            display: inline-block;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .setting-group .upload-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .setting-group input[type="file"] {
+            display: none;
+        }
+
+        .setting-group .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-group .toggle-container label {
+            margin-bottom: 0;
+        }
+
+        .setting-group .toggle-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        #highScores {
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            min-width: 200px;
+            position: fixed;
+            right: 100px;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        #highScores h3 {
+            margin: 0 0 15px 0;
+            text-align: center;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #highScoresList {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #highScoresList li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        #difficultySelector {
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        #difficultySelector option {
+            background: rgba(26, 42, 108, 0.9);
+            color: #fff;
+        }
+
+        #speedInfo {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        #backgroundSelector {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        #backgroundSelector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        #backgroundSelector input[type="file"] {
+            display: none;
+        }
+
+        #backgroundSelector .upload-btn {
+            display: inline-block;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #backgroundSelector .upload-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        #soundControl {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        #soundToggle {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        #musicControl {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        #musicToggle {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* 游戏结束对话框样式 */
+        #gameOverDialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            z-index: 1000;
+            min-width: 300px;
+        }
+
+        #gameOverDialog h2 {
+            margin: 0 0 20px 0;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #gameOverDialog p {
+            margin: 10px 0;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        #gameOverDialog .score {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #gameOverDialog .newRecord {
+            color: #ffd700;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        #gameOverDialog .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        #gameOverDialog button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        #gameOverDialog button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        #gameOverDialog .share-button {
+            background: rgba(0, 123, 255, 0.2);
+            border: 1px solid rgba(0, 123, 255, 0.3);
+        }
+
+        #gameOverDialog .share-button:hover {
+            background: rgba(0, 123, 255, 0.3);
+        }
+
+        #gameOverDialog .share-image-container {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        #gameOverDialog .share-image-container img {
+            max-width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        #gameOverDialog .share-image-container img:hover {
+            transform: scale(1.02);
+        }
+
+        #gameOverDialog .share-options {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        #gameOverDialog .share-options button {
+            margin: 5px;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        #gameOverDialog .copy-link {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        #gameOverDialog .copy-link:hover {
+            background: rgba(40, 167, 69, 0.3);
+        }
+
+        #gameOverDialog .share-qrcode {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        #gameOverDialog .share-qrcode:hover {
+            background: rgba(255, 193, 7, 0.3);
+        }
+
+        #gameOverDialog .qrcode-container {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        #gameOverDialog .qrcode-container img {
+            max-width: 200px;
+            border-radius: 5px;
+        }
+
+        /* 暂停遮罩样式 */
+        #pauseOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            backdrop-filter: blur(3px);
+        }
+
+        #pauseText {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 48px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        #pauseText small {
+            display: block;
+            font-size: 16px;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <!-- 添加暂停遮罩 -->
+    <div id="pauseOverlay">
+        <div id="pauseText">
+            游戏暂停<br>
+            <small>按空格键继续</small>
+        </div>
+    </div>
+
+    <!-- 添加游戏结束对话框 -->
+    <div id="gameOverDialog">
+        <h2>游戏结束</h2>
+        <p>你的得分：</p>
+        <div class="score" id="finalScore">0</div>
+        <p id="newRecordMessage" class="newRecord" style="display: none;">🎉 恭喜打破记录！ 🎉</p>
+        <div class="button-group">
+            <button onclick="resetGame()">再来一局</button>
+            <button class="share-button" onclick="generateShareImage()">分享成绩</button>
+        </div>
+        <div class="share-image-container" id="shareImageContainer">
+            <img id="shareImage" src="" alt="分享图片" onclick="downloadShareImage()">
+        </div>
+    </div>
+
+    <div id="settingsPanel">
+        <h3>游戏设置</h3>
+        <div class="setting-group">
+            <label>背景图片：</label>
+            <label class="upload-btn" for="bgImage">上传图片</label>
+            <input type="file" id="bgImage" accept="image/*">
+        </div>
+        <div class="setting-group">
+            <label>游戏难度：</label>
+            <select id="difficultySelector">
+                <option value="easy">简单</option>
+                <option value="medium">中等</option>
+                <option value="hard">困难</option>
+            </select>
+        </div>
+        <div class="setting-group">
+            <label>音效设置：</label>
+            <div class="toggle-container">
+                <label for="soundToggle">音效</label>
+                <input type="checkbox" id="soundToggle" checked>
+            </div>
+            <div class="toggle-container">
+                <label for="musicToggle">背景音乐</label>
+                <input type="checkbox" id="musicToggle" checked>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameContainer">
+        <div id="scoreBoard">得分: <span id="currentScore">0</span></div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div id="speedInfo">当前速度: <span id="currentSpeed">100.0</span>ms</div>
+    </div>
+    <div id="highScores">
+        <h3>高分榜</h3>
+        <ul id="highScoresList"></ul>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 确保画布尺寸正确
+        canvas.width = 400;
+        canvas.height = 400;
+        
+        // 游戏参数
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+        let score = 0;
+        let specialFoodOpacity = 1;
+        let specialFoodTimer = 0;
+        let isSpecialFoodVisible = true;
+        const SPECIAL_FOOD_DURATION = 3000; // 特殊食物持续时间（毫秒）
+        const SPECIAL_FOOD_BLINK_DURATION = 3000; // 闪烁持续时间（毫秒）
+        const SPECIAL_FOOD_BLINK_SPEED = 200; // 闪烁速度（毫秒）
+        const OBSTACLE_COUNT = 8; // 每条黑块的长度
+        let obstacles = []; // 存储黑块位置
+
+        // 难度设置
+        const difficultySettings = {
+            easy: { baseSpeed: 150, speedIncrease: 0.985, scoreMultiplier: 1 },
+            medium: { baseSpeed: 100, speedIncrease: 0.985, scoreMultiplier: 1.5 },
+            hard: { baseSpeed: 70, speedIncrease: 0.985, scoreMultiplier: 2 }
+        };
+
+        // 初始化游戏速度
+        function initGameSpeed() {
+            const difficulty = document.getElementById('difficultySelector').value;
+            const settings = difficultySettings[difficulty];
+            baseSpeed = settings.baseSpeed;
+            currentSpeed = baseSpeed;
+            document.getElementById('currentSpeed').textContent = currentSpeed.toFixed(1);
+        }
+
+        // 设置初始速度
+        let baseSpeed = difficultySettings.medium.baseSpeed;
+        let currentSpeed = baseSpeed;
+
+        // 蛇的初始位置和速度
+        let snake = [
+            {x: 10, y: 10}
+        ];
+        let dx = 0;
+        let dy = 0;
+
+        // 食物位置
+        let foodX = Math.floor(Math.random() * tileCount);
+        let foodY = Math.floor(Math.random() * tileCount);
+        let specialFoodX = -1;
+        let specialFoodY = -1;
+
+        let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || [];
+
+        let isPaused = false;
+        let gameLoopInterval;
+
+        // 游戏主循环
+        function gameLoop() {
+            if (isPaused) return;
+            
+            // 首先清除画布
+            clearCanvas();
+            
+            // 然后进行游戏逻辑
+            moveSnake();
+            if (checkGameOver()) {
+                return;
+            }
+            
+            // 更新和检查食物
+            updateSpecialFood();
+            checkFoodCollision();
+            checkSpecialFoodCollision();
+            
+            // 最后绘制所有元素
+            drawObstacles();
+            drawFood();
+            drawSpecialFood();
+            drawSnake();
+            
+            // 设置下一帧
+            gameLoopInterval = setTimeout(gameLoop, currentSpeed);
+        }
+
+        // 移动蛇
+        function moveSnake() {
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            
+            // 处理边界循环
+            if (head.x < 0) head.x = tileCount - 1;
+            if (head.x >= tileCount) head.x = 0;
+            if (head.y < 0) head.y = tileCount - 1;
+            if (head.y >= tileCount) head.y = 0;
+            
+            snake.unshift(head);
+            if (!checkFoodCollision()) {
+                snake.pop();
+            }
+        }
+
+        // 检查游戏是否结束
+        function checkGameOver() {
+            const head = snake[0];
+            // 检查是否撞到蛇身
+            if (snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y)) {
+                playGameOverSound();
+                showGameOverDialog();
+                return true;
+            }
+            // 检查是否撞到黑块
+            if (obstacles.some(obs => obs.x === head.x && obs.y === head.y)) {
+                playGameOverSound();
+                showGameOverDialog();
+                return true;
+            }
+            return false;
+        }
+
+        // 生成随机位置（确保不会与黑块重叠）
+        function generateRandomPosition() {
+            let x, y;
+            do {
+                x = Math.floor(Math.random() * tileCount);
+                y = Math.floor(Math.random() * tileCount);
+            } while (isPositionOccupied(x, y));
+            return {x, y};
+        }
+
+        // 检查位置是否被占用
+        function isPositionOccupied(x, y) {
+            // 检查是否与蛇身重叠
+            if (snake.some(segment => segment.x === x && segment.y === y)) {
+                return true;
+            }
+            // 检查是否与食物重叠
+            if (x === foodX && y === foodY) {
+                return true;
+            }
+            // 检查是否与特殊食物重叠
+            if (specialFoodX !== -1 && x === specialFoodX && y === specialFoodY) {
+                return true;
+            }
+            // 检查是否与其他黑块重叠
+            if (obstacles.some(obs => obs.x === x && obs.y === y)) {
+                return true;
+            }
+            return false;
+        }
+
+        // 检查是否吃到食物
+        function checkFoodCollision() {
+            const head = snake[0];
+            if (head.x === foodX && head.y === foodY) {
+                const difficulty = document.getElementById('difficultySelector').value;
+                const settings = difficultySettings[difficulty];
+                score += Math.floor(10 * settings.scoreMultiplier);
+                updateScoreDisplay();
+                updateSpeed();
+                playEatSound();
+                // 生成新的食物位置
+                const newPos = generateRandomPosition();
+                foodX = newPos.x;
+                foodY = newPos.y;
+                return true;
+            }
+            return false;
+        }
+
+        // 检查特殊食物碰撞
+        function checkSpecialFoodCollision() {
+            if (specialFoodX === -1) return false;
+            
+            const head = snake[0];
+            if (head.x === specialFoodX && head.y === specialFoodY) {
+                const difficulty = document.getElementById('difficultySelector').value;
+                const settings = difficultySettings[difficulty];
+                score += Math.floor(30 * settings.scoreMultiplier);
+                updateScoreDisplay();
+                updateSpeed();
+                playSpecialEatSound();
+                specialFoodX = -1;
+                specialFoodY = -1;
+                specialFoodOpacity = 1;
+                specialFoodTimer = 0;
+                return true;
+            }
+            return false;
+        }
+
+        // 清空画布
+        function clearCanvas() {
+            // 完全清除画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 添加半透明背景
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // 绘制食物
+        function drawFood() {
+            ctx.fillStyle = '#ff4757';
+            ctx.fillRect(foodX * gridSize, foodY * gridSize, gridSize - 2, gridSize - 2);
+            
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(foodX * gridSize, foodY * gridSize, gridSize - 2, gridSize - 2);
+        }
+
+        // 绘制蛇
+        function drawSnake() {
+            snake.forEach((segment, index) => {
+                const colorIntensity = 1 - (index / snake.length) * 0.3;
+                const r = Math.floor(46 * colorIntensity);
+                const g = Math.floor(213 * colorIntensity);
+                const b = Math.floor(115 * colorIntensity);
+                
+                ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+                
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+            });
+        }
+
+        // 绘制特殊食物
+        function drawSpecialFood() {
+            if (specialFoodX === -1 || !isSpecialFoodVisible) return;
+            
+            ctx.fillStyle = 'rgb(255, 255, 0)';
+            ctx.fillRect(specialFoodX * gridSize, specialFoodY * gridSize, gridSize - 2, gridSize - 2);
+            
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(specialFoodX * gridSize, specialFoodY * gridSize, gridSize - 2, gridSize - 2);
+        }
+
+        // 显示游戏结束对话框
+        function showGameOverDialog() {
+            const dialog = document.getElementById('gameOverDialog');
+            const finalScore = document.getElementById('finalScore');
+            const newRecordMessage = document.getElementById('newRecordMessage');
+            
+            // 更新最终得分
+            finalScore.textContent = score;
+            
+            // 检查是否打破记录
+            const isNewRecord = highScores.length === 0 || score > highScores[0];
+            newRecordMessage.style.display = isNewRecord ? 'block' : 'none';
+            
+            // 隐藏分享图片
+            document.getElementById('shareImageContainer').style.display = 'none';
+            
+            // 显示对话框
+            dialog.style.display = 'block';
+            
+            // 添加回车键监听
+            const handleEnterKey = function(e) {
+                if (e.key === 'Enter') {
+                    resetGame();
+                    document.removeEventListener('keydown', handleEnterKey);
+                }
+            };
+            document.addEventListener('keydown', handleEnterKey);
+        }
+
+        // 重置游戏
+        function resetGame() {
+            // 确保游戏不是暂停状态
+            if (isPaused) {
+                togglePause();
+            }
+            
+            // 隐藏游戏结束对话框
+            document.getElementById('gameOverDialog').style.display = 'none';
+            
+            updateHighScores();
+            snake = [{x: 10, y: 10}];
+            dx = 0;
+            dy = 0;
+            score = 0;
+            updateScoreDisplay();
+            initGameSpeed();
+            generateObstacles(); // 重新生成黑块
+            // 生成新的食物位置
+            const newPos = generateRandomPosition();
+            foodX = newPos.x;
+            foodY = newPos.y;
+            specialFoodX = -1;
+            specialFoodY = -1;
+            specialFoodOpacity = 1;
+            specialFoodTimer = 0;
+            isSpecialFoodVisible = true;
+            if (isMusicEnabled) {
+                bgMusic.currentTime = 0;
+                try {
+                    bgMusic.play();
+                } catch (e) {
+                    console.log('重置游戏时音乐播放失败:', e);
+                }
+            }
+            gameLoop();
+        }
+
+        // 初始化游戏
+        function initGame() {
+            // 确保画布尺寸正确
+            canvas.width = 400;
+            canvas.height = 400;
+            
+            // 初始化背景
+            initBackground();
+            
+            // 初始化游戏速度
+            initGameSpeed();
+            
+            // 初始化音效设置
+            initSoundSettings();
+            
+            // 初始化音乐设置
+            initMusicSettings();
+            
+            // 初始化高分榜
+            updateHighScores();
+            
+            // 生成黑块
+            generateObstacles();
+            
+            // 设置初始食物位置
+            const newPos = generateRandomPosition();
+            foodX = newPos.x;
+            foodY = newPos.y;
+            
+            // 添加清除记录的快捷键监听
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'r') {
+                    clearHighScores();
+                }
+                // 添加空格键暂停功能
+                if (e.key === ' ') {
+                    e.preventDefault(); // 防止空格键滚动页面
+                    togglePause();
+                }
+            });
+            
+            // 开始游戏循环
+            gameLoop();
+        }
+
+        // 页面加载完成后初始化游戏
+        window.addEventListener('load', function() {
+            initGame();
+        });
+
+        // 键盘控制
+        document.addEventListener('keydown', (event) => {
+            switch(event.key) {
+                case 'ArrowUp':
+                    if (dy !== 1) { dx = 0; dy = -1; }
+                    break;
+                case 'ArrowDown':
+                    if (dy !== -1) { dx = 0; dy = 1; }
+                    break;
+                case 'ArrowLeft':
+                    if (dx !== 1) { dx = -1; dy = 0; }
+                    break;
+                case 'ArrowRight':
+                    if (dx !== -1) { dx = 1; dy = 0; }
+                    break;
+            }
+        });
+
+        // 更新计分板显示
+        function updateScoreDisplay() {
+            document.getElementById('currentScore').textContent = score;
+        }
+
+        // 更新高分榜
+        function updateHighScores() {
+            highScores.push(score);
+            highScores.sort((a, b) => b - a);
+            highScores = highScores.slice(0, 5); // 只保留前5名
+            localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
+            
+            const highScoresList = document.getElementById('highScoresList');
+            highScoresList.innerHTML = '';
+            highScores.forEach((score, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${index + 1}. ${score}分`;
+                highScoresList.appendChild(li);
+            });
+        }
+
+        // 更新速度
+        function updateSpeed() {
+            const difficulty = document.getElementById('difficultySelector').value;
+            const settings = difficultySettings[difficulty];
+            const speedLevel = Math.floor(score / 10);
+            currentSpeed = settings.baseSpeed * Math.pow(settings.speedIncrease, speedLevel);
+            document.getElementById('currentSpeed').textContent = currentSpeed.toFixed(1);
+        }
+
+        // 添加难度选择事件监听
+        document.getElementById('difficultySelector').addEventListener('change', function() {
+            const difficulty = this.value;
+            const settings = difficultySettings[difficulty];
+            baseSpeed = settings.baseSpeed;
+            currentSpeed = baseSpeed;
+            document.getElementById('currentSpeed').textContent = currentSpeed.toFixed(1);
+        });
+
+        // 背景图片选择处理
+        document.getElementById('bgImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imageData = e.target.result;
+                    document.body.style.backgroundImage = `url('${imageData}')`;
+                    // 保存背景图片到本地存储
+                    localStorage.setItem('snakeBackground', imageData);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 初始化背景图片
+        function initBackground() {
+            const savedBackground = localStorage.getItem('snakeBackground');
+            if (savedBackground) {
+                document.body.style.backgroundImage = `url('${savedBackground}')`;
+            }
+        }
+
+        // 更新特殊食物
+        function updateSpecialFood() {
+            if (specialFoodX !== -1) {
+                specialFoodTimer += currentSpeed;
+                if (specialFoodTimer >= SPECIAL_FOOD_DURATION) {
+                    // 开始闪烁
+                    if (specialFoodTimer >= SPECIAL_FOOD_DURATION + SPECIAL_FOOD_BLINK_DURATION) {
+                        // 完全消失
+                        specialFoodX = -1;
+                        specialFoodY = -1;
+                        specialFoodOpacity = 1;
+                        specialFoodTimer = 0;
+                        isSpecialFoodVisible = true;
+                    } else {
+                        // 闪烁效果
+                        if (Math.floor(specialFoodTimer / SPECIAL_FOOD_BLINK_SPEED) % 2 === 0) {
+                            isSpecialFoodVisible = true;
+                        } else {
+                            isSpecialFoodVisible = false;
+                        }
+                    }
+                }
+            } else if (score > 0 && Math.floor(score / 200) > Math.floor((score - 10) / 200)) {
+                // 生成新的特殊食物（当分数超过200的整数倍时）
+                const newPos = generateRandomPosition();
+                specialFoodX = newPos.x;
+                specialFoodY = newPos.y;
+                specialFoodTimer = 0;
+                specialFoodOpacity = 1;
+                isSpecialFoodVisible = true;
+            }
+        }
+
+        // 音频上下文和音效
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // 创建音效函数
+        function createBeepSound(frequency, duration, type = 'sine') {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = type;
+            oscillator.frequency.value = frequency;
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            return {
+                play: function() {
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + duration);
+                }
+            };
+        }
+
+        // 创建不同的音效
+        function playEatSound() {
+            if (isSoundEnabled) {
+                createBeepSound(880, 0.1, 'sine').play();
+            }
+        }
+
+        function playSpecialEatSound() {
+            if (isSoundEnabled) {
+                createBeepSound(1320, 0.15, 'square').play();
+            }
+        }
+
+        function playGameOverSound() {
+            if (isSoundEnabled) {
+                const sound1 = createBeepSound(440, 0.3, 'sawtooth');
+                const sound2 = createBeepSound(220, 0.3, 'sawtooth');
+                sound1.play();
+                setTimeout(() => sound2.play(), 100);
+            }
+        }
+
+        // 音效控制
+        let isSoundEnabled = true;
+        document.getElementById('soundToggle').addEventListener('change', function() {
+            isSoundEnabled = this.checked;
+            localStorage.setItem('snakeSoundEnabled', isSoundEnabled);
+        });
+
+        // 初始化音效设置
+        function initSoundSettings() {
+            const savedSoundSetting = localStorage.getItem('snakeSoundEnabled');
+            if (savedSoundSetting !== null) {
+                isSoundEnabled = savedSoundSetting === 'true';
+                document.getElementById('soundToggle').checked = isSoundEnabled;
+            }
+        }
+
+        // 背景音乐
+        const bgMusic = new Audio();
+        bgMusic.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+        bgMusic.loop = true;
+        bgMusic.volume = 0.5;
+
+        // 音乐控制
+        let isMusicEnabled = true;
+
+        // 音乐控制事件监听
+        document.getElementById('musicToggle').addEventListener('change', function() {
+            isMusicEnabled = this.checked;
+            localStorage.setItem('snakeMusicEnabled', isMusicEnabled);
+            if (isMusicEnabled) {
+                try {
+                    bgMusic.play();
+                } catch (e) {
+                    console.log('音乐播放失败:', e);
+                }
+            } else {
+                bgMusic.pause();
+            }
+        });
+
+        // 初始化音乐设置
+        function initMusicSettings() {
+            const savedMusicSetting = localStorage.getItem('snakeMusicEnabled');
+            if (savedMusicSetting !== null) {
+                isMusicEnabled = savedMusicSetting === 'true';
+                document.getElementById('musicToggle').checked = isMusicEnabled;
+            }
+            
+            // 等待用户交互后播放音乐
+            const startMusic = () => {
+                if (isMusicEnabled) {
+                    try {
+                        bgMusic.play();
+                    } catch (e) {
+                        console.log('音乐播放失败:', e);
+                    }
+                }
+                // 移除事件监听器
+                document.removeEventListener('click', startMusic);
+                document.removeEventListener('keydown', startMusic);
+            };
+
+            // 添加事件监听器
+            document.addEventListener('click', startMusic);
+            document.addEventListener('keydown', startMusic);
+        }
+
+        // 生成黑块
+        function generateObstacles() {
+            obstacles = [];
+            
+            // 生成第一条黑块
+            generateSingleObstacle();
+            
+            // 生成第二条黑块
+            generateSingleObstacle();
+        }
+
+        // 生成单条黑块
+        function generateSingleObstacle() {
+            // 随机选择起始位置
+            let startX = Math.floor(Math.random() * (tileCount - OBSTACLE_COUNT));
+            let startY = Math.floor(Math.random() * (tileCount - OBSTACLE_COUNT));
+            
+            // 随机选择方向（水平或垂直）
+            const isHorizontal = Math.random() > 0.5;
+            
+            // 生成连续的黑块
+            for (let i = 0; i < OBSTACLE_COUNT; i++) {
+                let x, y;
+                if (isHorizontal) {
+                    x = startX + i;
+                    y = startY;
+                } else {
+                    x = startX;
+                    y = startY + i;
+                }
+                
+                // 确保不超出边界
+                if (x >= tileCount || y >= tileCount) {
+                    break;
+                }
+                
+                // 检查位置是否被占用
+                if (!isPositionOccupied(x, y)) {
+                    obstacles.push({x, y});
+                }
+            }
+        }
+
+        // 绘制黑块
+        function drawObstacles() {
+            ctx.fillStyle = '#000000';
+            obstacles.forEach(obs => {
+                ctx.fillRect(obs.x * gridSize, obs.y * gridSize, gridSize - 2, gridSize - 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(obs.x * gridSize, obs.y * gridSize, gridSize - 2, gridSize - 2);
+            });
+        }
+
+        // 清除高分榜
+        function clearHighScores() {
+            highScores = [];
+            localStorage.removeItem('snakeHighScores');
+            updateHighScores();
+            
+            // 显示清除成功的提示
+            const dialog = document.getElementById('gameOverDialog');
+            const originalDisplay = dialog.style.display;
+            const originalContent = dialog.innerHTML;
+            
+            dialog.style.display = 'block';
+            dialog.innerHTML = `
+                <h2>清除记录</h2>
+                <p>高分榜已成功清除！</p>
+                <button onclick="closeDialog()">确定</button>
+            `;
+            
+            // 添加关闭对话框的函数
+            window.closeDialog = function() {
+                dialog.style.display = originalDisplay;
+                dialog.innerHTML = originalContent;
+            };
+        }
+
+        // 暂停/继续游戏
+        function togglePause() {
+            isPaused = !isPaused;
+            const pauseOverlay = document.getElementById('pauseOverlay');
+            pauseOverlay.style.display = isPaused ? 'block' : 'none';
+            
+            if (isPaused) {
+                // 暂停音乐
+                if (isMusicEnabled) {
+                    bgMusic.pause();
+                }
+            } else {
+                // 继续音乐
+                if (isMusicEnabled) {
+                    try {
+                        bgMusic.play();
+                    } catch (e) {
+                        console.log('继续游戏时音乐播放失败:', e);
+                    }
+                }
+                // 继续游戏循环
+                gameLoop();
+            }
+        }
+
+        // 生成分享图片
+        function generateShareImage() {
+            const shareImageContainer = document.getElementById('shareImageContainer');
+            const shareImage = document.getElementById('shareImage');
+            
+            // 创建临时canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 500;
+            const ctx = canvas.getContext('2d');
+            
+            // 获取游戏背景
+            const gameBackground = new Image();
+            gameBackground.crossOrigin = 'Anonymous';
+            gameBackground.onload = function() {
+                // 绘制背景
+                ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
+                
+                // 添加半透明遮罩
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制标题
+                ctx.font = 'bold 32px Arial';
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.fillText('贪吃蛇游戏', canvas.width / 2, 60);
+                
+                // 绘制得分
+                ctx.font = 'bold 48px Arial';
+                ctx.fillStyle = '#ffd700';
+                ctx.fillText(`得分: ${score}`, canvas.width / 2, 150);
+                
+                // 绘制难度
+                const difficulty = document.getElementById('difficultySelector').value;
+                const difficultyText = {
+                    'easy': '简单模式',
+                    'medium': '中等模式',
+                    'hard': '困难模式'
+                }[difficulty];
+                ctx.font = '24px Arial';
+                ctx.fillStyle = '#fff';
+                ctx.fillText(difficultyText, canvas.width / 2, 200);
+                
+                // 生成二维码
+                const qrCanvas = document.createElement('canvas');
+                qrCanvas.width = 200;
+                qrCanvas.height = 200;
+                const qrCtx = qrCanvas.getContext('2d');
+                
+                // 使用第三方API生成二维码
+                const qrImage = new Image();
+                qrImage.crossOrigin = 'Anonymous';
+                qrImage.onload = function() {
+                    qrCtx.drawImage(qrImage, 0, 0, 200, 200);
+                    
+                    // 将二维码绘制到主canvas
+                    ctx.drawImage(qrCanvas, (canvas.width - 200) / 2, 250);
+                    
+                    // 添加提示文字
+                    ctx.font = '16px Arial';
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText('扫描二维码开始游戏', canvas.width / 2, 480);
+                    
+                    // 转换为图片并显示
+                    shareImage.src = canvas.toDataURL('image/png');
+                    shareImageContainer.style.display = 'block';
+                };
+                
+                const shareLink = `${window.location.href}?score=${score}&difficulty=${difficulty}`;
+                qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareLink)}`;
+            };
+            
+            // 获取当前背景图片
+            const currentBackground = document.body.style.backgroundImage;
+            if (currentBackground) {
+                gameBackground.src = currentBackground.replace(/url\(['"](.+)['"]\)/, '$1');
+            } else {
+                // 如果没有自定义背景，使用默认背景
+                gameBackground.src = 'https://img.freepik.com/free-vector/gradient-pastel-sky-background_23-2148917404.jpg';
+            }
+        }
+
+        // 下载分享图片
+        function downloadShareImage() {
+            const shareImage = document.getElementById('shareImage');
+            const link = document.createElement('a');
+            link.download = `贪吃蛇游戏_得分${score}.png`;
+            link.href = shareImage.src;
+            link.click();
+        }
+    </script>
+</body>
+</html>
