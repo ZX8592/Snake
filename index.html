@@ -6,8 +6,8 @@
     <style>
         body {
             display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
+            flex-direction: row;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
@@ -17,7 +17,7 @@
             font-family: 'Arial', sans-serif;
             color: #fff;
             position: relative;
-            overflow-x: hidden;
+            overflow: auto;
             box-sizing: border-box;
         }
 
@@ -45,8 +45,6 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
             box-sizing: border-box;
-            width: 100%;
-            max-width: 400px;
         }
 
         #gameCanvas {
@@ -506,93 +504,45 @@
                 padding: 10px;
                 min-height: 100vh;
                 overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
             }
 
             .mobile-layout {
-                padding: 10px 0;
-                gap: 40px;
+                width: 100%;
+                max-width: 400px;
+                display: flex;
+                flex-direction: column;
+                gap: 30px;
+                margin: 0 auto;
             }
 
             #gameContainer {
                 width: 100%;
-                max-width: 400px;
                 margin: 0 auto;
-                padding: 15px;
+                order: 1;
             }
 
             .controls-container {
                 width: 100%;
-                max-width: 400px;
-                margin: 0 auto;
-                gap: 40px;
+                display: flex;
+                flex-direction: column;
+                gap: 30px;
+                order: 2;
             }
 
             #settingsPanel,
             #highScores {
                 width: 100%;
-                max-width: 400px;
-                margin: 0 auto;
+                margin: 0;
             }
 
+            /* 调整游戏画布大小 */
             #gameCanvas {
                 width: 100%;
                 height: auto;
-                max-width: 400px;
                 aspect-ratio: 1;
-            }
-
-            #scoreBoard {
-                font-size: 20px;
-                margin-bottom: 10px;
-            }
-
-            #gameOverDialog {
-                width: 90%;
-                max-width: 350px;
-                padding: 15px;
-            }
-
-            .button-group {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .button-group button {
-                width: 100%;
-                margin: 5px 0;
-            }
-
-            #pauseText {
-                font-size: 36px;
-            }
-
-            #pauseText small {
-                font-size: 14px;
-            }
-
-            .setting-group select,
-            .setting-group .upload-btn {
-                width: 100%;
-                box-sizing: border-box;
-            }
-
-            /* 触摸设备优化 */
-            .setting-group select,
-            .setting-group .upload-btn,
-            button {
-                min-height: 44px;
-                padding: 12px;
-            }
-
-            /* 防止iOS设备上的点击延迟 */
-            * {
-                -webkit-tap-highlight-color: transparent;
-            }
-
-            /* 优化移动设备上的滚动体验 */
-            .setting-group,
-            #highScoresList {
-                -webkit-overflow-scrolling: touch;
             }
         }
 
@@ -603,32 +553,31 @@
             }
 
             .mobile-layout {
+                max-width: none;
                 flex-direction: row;
                 justify-content: center;
                 align-items: flex-start;
                 gap: 20px;
-                padding: 10px;
             }
 
             #gameContainer {
                 flex: 0 0 auto;
-                margin: 0;
-                max-width: 300px;
+                width: auto;
             }
 
             .controls-container {
                 flex: 0 0 auto;
+                width: auto;
                 max-height: 100vh;
                 overflow-y: auto;
-                gap: 20px;
-                max-width: 300px;
             }
 
+            /* 调整横屏模式下的游戏画布大小 */
             #gameCanvas {
-                width: 100%;
-                height: auto;
+                width: 60vw;
+                height: 60vw;
                 max-width: 300px;
-                aspect-ratio: 1;
+                max-height: 300px;
             }
         }
 
@@ -639,41 +588,23 @@
             }
 
             .mobile-layout {
-                padding: 5px 0;
-                gap: 30px;
+                gap: 20px;
             }
 
             #gameContainer {
                 padding: 10px;
-                max-width: 280px;
             }
 
             .controls-container {
-                gap: 30px;
-                max-width: 280px;
+                gap: 20px;
             }
 
+            /* 调整超小屏幕下的游戏画布大小 */
             #gameCanvas {
-                width: 100%;
-                height: auto;
+                width: 90vw;
+                height: 90vw;
                 max-width: 280px;
-                aspect-ratio: 1;
-            }
-
-            #scoreBoard {
-                font-size: 16px;
-            }
-
-            .setting-group label {
-                font-size: 14px;
-            }
-
-            #gameOverDialog {
-                padding: 10px;
-            }
-
-            #gameOverDialog h2 {
-                font-size: 20px;
+                max-height: 280px;
             }
         }
 
@@ -681,17 +612,18 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            gap: 40px;
+            gap: 20px;
         }
 
         .controls-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 40px;
+            gap: 20px;
             width: 100%;
             max-width: 400px;
         }
