@@ -74,6 +74,15 @@
             font-size: 24px;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        #scoreBoard:hover {
+            background-color: rgba(255, 255, 255, 0.15);
         }
 
         #settingsPanel {
@@ -515,7 +524,7 @@
                 <label>游戏难度：</label>
                 <select id="difficultySelector">
                     <option value="easy">简单</option>
-                    <option value="medium">普通</option>
+                    <option value="medium" selected>普通</option>
                     <option value="hard">困难</option>
                 </select>
             </div>
@@ -597,69 +606,100 @@
         let touchStartY = 0;
         let touchEndX = 0;
         let touchEndY = 0;
-        const minSwipeDistance = 30; // 最小滑动距离
+        let lastTouchDirection = ''; // 记录上一次触摸方向
+        const minSwipeDistance = 15; // 降低最小滑动距离，提高灵敏度
+        let touchMoveTriggered = false; // 标记是否已触发方向改变
 
         // 添加触摸事件监听
-        canvas.addEventListener('touchstart', handleTouchStart, false);
-        canvas.addEventListener('touchmove', handleTouchMove, false);
-        canvas.addEventListener('touchend', handleTouchEnd, false);
+        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+        canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
 
         // 触摸开始事件处理
         function handleTouchStart(event) {
             event.preventDefault();
             touchStartX = event.touches[0].clientX;
             touchStartY = event.touches[0].clientY;
+            touchMoveTriggered = false; // 重置方向触发状态
         }
 
         // 触摸移动事件处理
         function handleTouchMove(event) {
             event.preventDefault();
+            
+            if (touchMoveTriggered) return; // 如果已经触发了方向变化，忽略后续移动
+            
             touchEndX = event.touches[0].clientX;
             touchEndY = event.touches[0].clientY;
+            
+            // 计算滑动距离
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            
+            // 如果滑动距离太小，不处理
+            if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+                return;
+            }
+            
+            // 确定滑动方向
+            let direction = '';
+            
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // 水平滑动
+                direction = deltaX > 0 ? 'right' : 'left';
+            } else {
+                // 垂直滑动
+                direction = deltaY > 0 ? 'down' : 'up';
+            }
+            
+            // 避免反方向移动 (例如蛇向右移动时不能立即向左移动)
+            if ((direction === 'right' && dx !== -1) || 
+                (direction === 'left' && dx !== 1) || 
+                (direction === 'up' && dy !== 1) || 
+                (direction === 'down' && dy !== -1)) {
+                
+                // 与上次方向不同才改变方向
+                if (direction !== lastTouchDirection) {
+                    switch (direction) {
+                        case 'right':
+                            dx = 1;
+                            dy = 0;
+                            break;
+                        case 'left':
+                            dx = -1;
+                            dy = 0;
+                            break;
+                        case 'up':
+                            dx = 0;
+                            dy = -1;
+                            break;
+                        case 'down':
+                            dx = 0;
+                            dy = 1;
+                            break;
+                    }
+                    
+                    lastTouchDirection = direction;
+                    touchMoveTriggered = true; // 标记已触发方向变化
+                    
+                    // 播放转向音效
+                    if (isSoundEnabled) {
+                        createBeepSound(440, 0.05, 'sine').play();
+                    }
+                    
+                    // 重置触摸起始点，为下一次滑动做准备
+                    touchStartX = touchEndX;
+                    touchStartY = touchEndY;
+                }
+            }
         }
 
         // 触摸结束事件处理
         function handleTouchEnd(event) {
             event.preventDefault();
             
-            // 计算滑动距离
-            const deltaX = touchEndX - touchStartX;
-            const deltaY = touchEndY - touchStartY;
-            
-            // 判断滑动方向
-            if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                // 水平滑动
-                if (Math.abs(deltaX) > minSwipeDistance) {
-                    if (deltaX > 0 && dx !== -1) {
-                        // 向右滑动
-                        dx = 1;
-                        dy = 0;
-                    } else if (deltaX < 0 && dx !== 1) {
-                        // 向左滑动
-                        dx = -1;
-                        dy = 0;
-                    }
-                }
-            } else {
-                // 垂直滑动
-                if (Math.abs(deltaY) > minSwipeDistance) {
-                    if (deltaY > 0 && dy !== -1) {
-                        // 向下滑动
-                        dx = 0;
-                        dy = 1;
-                    } else if (deltaY < 0 && dy !== 1) {
-                        // 向上滑动
-                        dx = 0;
-                        dy = -1;
-                    }
-                }
-            }
-            
-            // 重置触摸位置
-            touchStartX = 0;
-            touchStartY = 0;
-            touchEndX = 0;
-            touchEndY = 0;
+            // 重置变量但保留最后方向记录
+            touchMoveTriggered = false;
         }
 
         // 游戏主循环
@@ -761,6 +801,7 @@
             if (head.x === foodX && head.y === foodY) {
                 const difficulty = document.getElementById('difficultySelector').value;
                 const settings = difficultySettings[difficulty];
+                const oldScore = score;
                 score += Math.floor(10 * settings.scoreMultiplier);
                 updateScoreDisplay();
                 updateSpeed();
@@ -769,6 +810,21 @@
                 const newPos = generateRandomPosition();
                 foodX = newPos.x;
                 foodY = newPos.y;
+                
+                // 检查分数是否跨越了200的整数倍边界
+                const oldScoreDiv = Math.floor(oldScore / 200);
+                const newScoreDiv = Math.floor(score / 200);
+                if (newScoreDiv > oldScoreDiv && specialFoodX === -1) {
+                    // 在跨越200整数倍时生成特殊食物
+                    console.log(`跨越200整数倍: ${oldScore} -> ${score}, 生成特殊食物`);
+                    const specialPos = generateRandomPosition();
+                    specialFoodX = specialPos.x;
+                    specialFoodY = specialPos.y;
+                    specialFoodTimer = 0;
+                    specialFoodOpacity = 1;
+                    isSpecialFoodVisible = true;
+                }
+                
                 return true;
             }
             return false;
@@ -911,18 +967,24 @@
             gameLoop();
         }
 
-        // 修改暂停/继续游戏函数
+        // 修改暂停/继续游戏函数，添加状态提示
         function togglePause() {
             isPaused = !isPaused;
             const pauseOverlay = document.getElementById('pauseOverlay');
             pauseOverlay.style.display = isPaused ? 'block' : 'none';
             
+            // 更新得分板样式，提示暂停状态
+            const scoreBoard = document.getElementById('scoreBoard');
             if (isPaused) {
+                scoreBoard.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                scoreBoard.style.cursor = 'pointer';
                 // 暂停音乐
                 if (isMusicEnabled) {
                     bgMusic.pause();
                 }
             } else {
+                scoreBoard.style.backgroundColor = 'transparent';
+                scoreBoard.style.cursor = 'default';
                 // 继续音乐
                 if (isMusicEnabled) {
                     try {
@@ -956,7 +1018,7 @@
         // 在窗口大小改变时调整canvas尺寸
         window.addEventListener('resize', resizeCanvas);
 
-        // 在游戏初始化时调用
+        // 初始化游戏
         function initGame() {
             // 确保画布尺寸正确
             canvas.width = 400;
@@ -976,6 +1038,11 @@
             
             // 初始化音乐设置
             initMusicSettings();
+            
+            // 尝试立即播放背景音乐
+            if (isMusicEnabled) {
+                playBackgroundMusic();
+            }
             
             // 初始化高分榜
             updateHighScores();
@@ -1006,14 +1073,85 @@
                 togglePause();
             });
             
+            // 添加点击得分区域暂停功能
+            document.getElementById('scoreBoard').addEventListener('click', function(e) {
+                e.preventDefault();
+                togglePause();
+            });
+            
             // 开始游戏循环
             gameLoop();
         }
 
-        // 页面加载完成后初始化游戏
-        window.addEventListener('load', function() {
-            initGame();
-        });
+        // 尝试播放背景音乐的函数
+        function playBackgroundMusic() {
+            try {
+                // 创建一个用户交互事件处理函数，在用户首次交互时播放音乐
+                const startMusic = function() {
+                    bgMusic.play().then(() => {
+                        console.log('背景音乐开始播放');
+                    }).catch(e => {
+                        console.log('背景音乐播放失败:', e);
+                    });
+                    // 移除事件监听器
+                    document.removeEventListener('click', startMusic);
+                    document.removeEventListener('keydown', startMusic);
+                    document.removeEventListener('touchstart', startMusic);
+                };
+
+                // 添加事件监听器
+                document.addEventListener('click', startMusic);
+                document.addEventListener('keydown', startMusic);
+                document.addEventListener('touchstart', startMusic);
+                
+                // 也尝试直接播放（如果浏览器允许的话）
+                bgMusic.play().then(() => {
+                    console.log('背景音乐开始播放');
+                    // 播放成功则移除事件监听器
+                    document.removeEventListener('click', startMusic);
+                    document.removeEventListener('keydown', startMusic);
+                    document.removeEventListener('touchstart', startMusic);
+                }).catch(e => {
+                    console.log('等待用户交互后再尝试播放音乐');
+                });
+            } catch (e) {
+                console.log('音乐播放初始化失败:', e);
+            }
+        }
+
+        // 更新特殊食物
+        function updateSpecialFood() {
+            if (specialFoodX !== -1) {
+                specialFoodTimer += currentSpeed;
+                if (specialFoodTimer >= SPECIAL_FOOD_DURATION) {
+                    // 开始闪烁
+                    if (specialFoodTimer >= SPECIAL_FOOD_DURATION + SPECIAL_FOOD_BLINK_DURATION) {
+                        // 完全消失
+                        specialFoodX = -1;
+                        specialFoodY = -1;
+                        specialFoodOpacity = 1;
+                        specialFoodTimer = 0;
+                        isSpecialFoodVisible = true;
+                    } else {
+                        // 闪烁效果
+                        if (Math.floor(specialFoodTimer / SPECIAL_FOOD_BLINK_SPEED) % 2 === 0) {
+                            isSpecialFoodVisible = true;
+                        } else {
+                            isSpecialFoodVisible = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 初始化音乐设置
+        function initMusicSettings() {
+            const savedMusicSetting = localStorage.getItem('snakeMusicEnabled');
+            if (savedMusicSetting !== null) {
+                isMusicEnabled = savedMusicSetting === 'true';
+                document.getElementById('musicToggle').checked = isMusicEnabled;
+            }
+        }
 
         // 键盘控制
         document.addEventListener('keydown', (event) => {
@@ -1127,62 +1265,40 @@
             }
         }
 
-        // 更新特殊食物
-        function updateSpecialFood() {
-            if (specialFoodX !== -1) {
-                specialFoodTimer += currentSpeed;
-                if (specialFoodTimer >= SPECIAL_FOOD_DURATION) {
-                    // 开始闪烁
-                    if (specialFoodTimer >= SPECIAL_FOOD_DURATION + SPECIAL_FOOD_BLINK_DURATION) {
-                        // 完全消失
-                        specialFoodX = -1;
-                        specialFoodY = -1;
-                        specialFoodOpacity = 1;
-                        specialFoodTimer = 0;
-                        isSpecialFoodVisible = true;
-                    } else {
-                        // 闪烁效果
-                        if (Math.floor(specialFoodTimer / SPECIAL_FOOD_BLINK_SPEED) % 2 === 0) {
-                            isSpecialFoodVisible = true;
-                        } else {
-                            isSpecialFoodVisible = false;
-                        }
-                    }
-                }
-            } else if (score > 0 && Math.floor(score / 200) > Math.floor((score - 10) / 200)) {
-                // 生成新的特殊食物（当分数超过200的整数倍时）
-                const newPos = generateRandomPosition();
-                specialFoodX = newPos.x;
-                specialFoodY = newPos.y;
-                specialFoodTimer = 0;
-                specialFoodOpacity = 1;
-                isSpecialFoodVisible = true;
-            }
-        }
-
         // 音频上下文和音效
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
         // 创建音效函数
         function createBeepSound(frequency, duration, type = 'sine') {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+            if (!audioContext) return { play: function() {} };
             
-            oscillator.type = type;
-            oscillator.frequency.value = frequency;
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            return {
-                play: function() {
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + duration);
-                }
-            };
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = type;
+                oscillator.frequency.value = frequency;
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                return {
+                    play: function() {
+                        try {
+                            oscillator.start(audioContext.currentTime);
+                            oscillator.stop(audioContext.currentTime + duration);
+                        } catch (e) {
+                            console.log('音效播放失败:', e);
+                        }
+                    }
+                };
+            } catch (e) {
+                console.log('创建音效失败:', e);
+                return { play: function() {} };
+            }
         }
 
         // 创建不同的音效
@@ -1246,33 +1362,6 @@
                 bgMusic.pause();
             }
         });
-
-        // 初始化音乐设置
-        function initMusicSettings() {
-            const savedMusicSetting = localStorage.getItem('snakeMusicEnabled');
-            if (savedMusicSetting !== null) {
-                isMusicEnabled = savedMusicSetting === 'true';
-                document.getElementById('musicToggle').checked = isMusicEnabled;
-            }
-            
-            // 等待用户交互后播放音乐
-            const startMusic = () => {
-                if (isMusicEnabled) {
-                    try {
-                        bgMusic.play();
-                    } catch (e) {
-                        console.log('音乐播放失败:', e);
-                    }
-                }
-                // 移除事件监听器
-                document.removeEventListener('click', startMusic);
-                document.removeEventListener('keydown', startMusic);
-            };
-
-            // 添加事件监听器
-            document.addEventListener('click', startMusic);
-            document.addEventListener('keydown', startMusic);
-        }
 
         // 生成黑块
         function generateObstacles() {
@@ -1487,7 +1576,7 @@
                 // 添加底部署名
                 ctx.font = '14px Arial';
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                ctx.fillText('贪吃蛇 v1.0.6', canvas.width / 2, 480);
+                ctx.fillText('贪吃蛇 v1.1.0Bata', canvas.width / 2, 480);
                 
                 // 转换为图片并显示
                 shareImage.src = canvas.toDataURL('image/png');
@@ -1528,6 +1617,11 @@
                 alert('复制失败，请手动复制链接');
             });
         }
+
+        // 页面加载完成后初始化游戏
+        window.addEventListener('load', function() {
+            initGame();
+        });
     </script>
 </body>
 </html>
