@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
             padding: 20px;
             background: url('https://img.freepik.com/free-vector/gradient-pastel-sky-background_23-2148917404.jpg') no-repeat center center fixed;
@@ -17,8 +12,13 @@
             font-family: 'Arial', sans-serif;
             color: #fff;
             position: relative;
-            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
             box-sizing: border-box;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         body::before {
@@ -32,12 +32,20 @@
             z-index: -1;
         }
 
+        .mobile-layout {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            gap: 40px;
+        }
+
         #gameContainer {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 0;
-            position: relative;
             background: rgba(255, 255, 255, 0.15);
             padding: 20px;
             border-radius: 15px;
@@ -45,6 +53,9 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
             box-sizing: border-box;
+            width: 450px;
+            order: 2;
+            margin: 0 40px;
         }
 
         #gameCanvas {
@@ -54,6 +65,8 @@
             display: block;
             margin: 0 auto;
             touch-action: none; /* 防止触摸事件的默认行为 */
+            width: 400px;
+            height: 400px;
         }
 
         #scoreBoard {
@@ -69,16 +82,27 @@
             border-radius: 15px;
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(8px);
-            min-width: 200px;
-            position: fixed;
-            left: 100px;
-            top: 50%;
-            transform: translateY(-50%);
+            width: 230px;
+            box-sizing: border-box;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
+            order: 3;
         }
 
-        #settingsPanel h3 {
+        #highScores {
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            width: 230px;
+            box-sizing: border-box;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            order: 1;
+        }
+
+        #settingsPanel h3, #highScores h3 {
             margin: 0 0 15px 0;
             text-align: center;
             color: #fff;
@@ -156,28 +180,6 @@
             cursor: pointer;
         }
 
-        #highScores {
-            padding: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(8px);
-            min-width: 200px;
-            position: fixed;
-            right: 100px;
-            top: 50%;
-            transform: translateY(-50%);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-
-        #highScores h3 {
-            margin: 0 0 15px 0;
-            text-align: center;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
         #highScoresList {
             list-style-type: none;
             padding: 0;
@@ -212,73 +214,6 @@
             font-size: 16px;
             color: #fff;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        #backgroundSelector {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        }
-
-        #backgroundSelector label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        #backgroundSelector input[type="file"] {
-            display: none;
-        }
-
-        #backgroundSelector .upload-btn {
-            display: inline-block;
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        #backgroundSelector .upload-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        #soundControl {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #fff;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        #soundToggle {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        #musicControl {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #fff;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        #musicToggle {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
         }
 
         /* 自定义滚动条 */
@@ -421,51 +356,6 @@
             opacity: 0;
         }
 
-        #gameOverDialog .share-options {
-            display: none;
-            margin-top: 15px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-        }
-
-        #gameOverDialog .share-options button {
-            margin: 5px;
-            padding: 8px 15px;
-            font-size: 14px;
-        }
-
-        #gameOverDialog .copy-link {
-            background: rgba(40, 167, 69, 0.2);
-            border: 1px solid rgba(40, 167, 69, 0.3);
-        }
-
-        #gameOverDialog .copy-link:hover {
-            background: rgba(40, 167, 69, 0.3);
-        }
-
-        #gameOverDialog .share-qrcode {
-            background: rgba(255, 193, 7, 0.2);
-            border: 1px solid rgba(255, 193, 7, 0.3);
-        }
-
-        #gameOverDialog .share-qrcode:hover {
-            background: rgba(255, 193, 7, 0.3);
-        }
-
-        #gameOverDialog .qrcode-container {
-            display: none;
-            margin-top: 15px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-        }
-
-        #gameOverDialog .qrcode-container img {
-            max-width: 200px;
-            border-radius: 5px;
-        }
-
         /* 暂停遮罩样式 */
         #pauseOverlay {
             display: none;
@@ -498,133 +388,67 @@
             opacity: 0.8;
         }
 
-        /* 移动设备适配 */
+        /* 移动设备专用样式 */
         @media screen and (max-width: 768px) and (orientation: portrait) {
             body {
                 padding: 10px;
-                min-height: 100vh;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
+                justify-content: flex-start;
             }
 
             .mobile-layout {
-                width: 100%;
-                max-width: 400px;
-                display: flex;
                 flex-direction: column;
-                gap: 30px;
-                margin: 0 auto;
+                align-items: center;
+                gap: 20px;
             }
 
             #gameContainer {
                 width: 100%;
-                margin: 0 auto;
+                max-width: 400px;
                 order: 1;
-            }
-
-            .controls-container {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                gap: 30px;
-                order: 2;
-            }
-
-            #settingsPanel {
-                width: 100%;
                 margin: 0;
-                order: 1;
             }
 
+            #settingsPanel, #highScores {
+                width: 100%;
+                max-width: 400px;
+            }
+            
             #highScores {
-                width: 100%;
-                margin: 0;
                 order: 2;
             }
+            
+            #settingsPanel {
+                order: 3;
+            }
 
-            /* 调整游戏画布大小 */
             #gameCanvas {
                 width: 100%;
                 height: auto;
                 aspect-ratio: 1;
+                max-width: 350px;
+                max-height: 350px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .button-group button {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            #pauseText {
+                font-size: 36px;
+            }
+
+            #pauseText small {
+                font-size: 14px;
             }
         }
 
-        /* 横屏模式优化 */
-        @media screen and (max-width: 768px) and (orientation: landscape) {
-            body {
-                padding: 10px;
-            }
-
-            .mobile-layout {
-                max-width: none;
-                flex-direction: row;
-                justify-content: center;
-                align-items: flex-start;
-                gap: 20px;
-            }
-
-            #gameContainer {
-                flex: 0 0 auto;
-                width: auto;
-                order: 1;
-            }
-
-            .controls-container {
-                flex: 0 0 auto;
-                width: auto;
-                max-height: 100vh;
-                overflow-y: auto;
-                order: 2;
-            }
-
-            #settingsPanel,
-            #highScores {
-                width: auto;
-                margin: 0;
-            }
-
-            /* 调整横屏模式下的游戏画布大小 */
-            #gameCanvas {
-                width: 60vw;
-                height: 60vw;
-                max-width: 300px;
-                max-height: 300px;
-            }
-        }
-
-        /* 超小屏幕设备优化 */
-        @media screen and (max-width: 320px) and (orientation: portrait) {
-            body {
-                padding: 5px;
-            }
-
-            .mobile-layout {
-                gap: 20px;
-            }
-
-            #gameContainer {
-                padding: 10px;
-            }
-
-            .controls-container {
-                gap: 20px;
-            }
-
-            /* 调整超小屏幕下的游戏画布大小 */
-            #gameCanvas {
-                width: 90vw;
-                height: 90vw;
-                max-width: 280px;
-                max-height: 280px;
-            }
-        }
-
-        /* 添加触摸设备检测 */
+        /* 触摸设备优化 */
         @media (hover: none) and (pointer: coarse) {
-            /* 触摸设备特定的样式 */
             .setting-group select,
             .setting-group .upload-btn,
             button {
@@ -632,36 +456,14 @@
                 padding: 12px;
             }
 
-            /* 防止iOS设备上的点击延迟 */
             * {
                 -webkit-tap-highlight-color: transparent;
             }
 
-            /* 优化移动设备上的滚动体验 */
             .setting-group,
             #highScoresList {
                 -webkit-overflow-scrolling: touch;
             }
-        }
-
-        .mobile-layout {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            gap: 20px;
-        }
-
-        .controls-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            width: 100%;
-            max-width: 400px;
         }
     </style>
 </head>
@@ -691,44 +493,42 @@
     </div>
 
     <div class="mobile-layout">
+        <div id="highScores">
+            <h3>高分榜</h3>
+            <ul id="highScoresList"></ul>
+        </div>
+
         <div id="gameContainer">
             <div id="scoreBoard">得分: <span id="currentScore">0</span></div>
             <canvas id="gameCanvas" width="400" height="400"></canvas>
             <div id="speedInfo">当前速度: <span id="currentSpeed">100.0</span>ms</div>
         </div>
 
-        <div class="controls-container">
-            <div id="settingsPanel">
-                <h3>游戏设置</h3>
-                <div class="setting-group">
-                    <label>背景图片：</label>
-                    <label class="upload-btn" for="bgImage">上传图片</label>
-                    <input type="file" id="bgImage" accept="image/*">
-                </div>
-                <div class="setting-group">
-                    <label>游戏难度：</label>
-                    <select id="difficultySelector">
-                        <option value="easy">简单</option>
-                        <option value="medium">中等</option>
-                        <option value="hard">困难</option>
-                    </select>
-                </div>
-                <div class="setting-group">
-                    <label>音效设置：</label>
-                    <div class="toggle-container">
-                        <label for="soundToggle">音效</label>
-                        <input type="checkbox" id="soundToggle" checked>
-                    </div>
-                    <div class="toggle-container">
-                        <label for="musicToggle">背景音乐</label>
-                        <input type="checkbox" id="musicToggle" checked>
-                    </div>
-                </div>
+        <div id="settingsPanel">
+            <h3>游戏设置</h3>
+            <div class="setting-group">
+                <label>背景图片：</label>
+                <label class="upload-btn" for="bgImage">上传图片</label>
+                <input type="file" id="bgImage" accept="image/*">
             </div>
-
-            <div id="highScores">
-                <h3>高分榜</h3>
-                <ul id="highScoresList"></ul>
+            <div class="setting-group">
+                <label>游戏难度：</label>
+                <select id="difficultySelector">
+                    <option value="easy">简单</option>
+                    <option value="medium">普通</option>
+                    <option value="hard">困难</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label>音效设置：</label>
+                <div class="toggle-container">
+                    <label for="soundToggle">音效</label>
+                    <input type="checkbox" id="soundToggle" checked>
+                </div>
+                <div class="toggle-container">
+                    <label for="musicToggle">背景音乐</label>
+                    <input type="checkbox" id="musicToggle" checked>
+                </div>
             </div>
         </div>
     </div>
@@ -1270,7 +1070,39 @@
             baseSpeed = settings.baseSpeed;
             currentSpeed = baseSpeed;
             document.getElementById('currentSpeed').textContent = currentSpeed.toFixed(1);
+            
+            // 在难度改变时立即重新生成黑块
+            obstacles = []; // 清空现有的黑块
+            generateObstacles();
+            
+            // 确保食物和特殊食物不会与新生成的黑块重叠
+            // 检查食物位置
+            if (isPositionOccupied(foodX, foodY)) {
+                const newPos = generateRandomPosition();
+                foodX = newPos.x;
+                foodY = newPos.y;
+            }
+            
+            // 检查特殊食物位置
+            if (specialFoodX !== -1 && isPositionOccupied(specialFoodX, specialFoodY)) {
+                specialFoodX = -1;
+                specialFoodY = -1;
+                specialFoodTimer = 0;
+            }
+            
+            // 让选择框失去焦点，防止方向键误触改变难度
+            this.blur();
         });
+        
+        // 防止键盘事件被表单元素捕获
+        document.addEventListener('keydown', function(event) {
+            // 当按下方向键时，如果焦点在select上，则使其失去焦点
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+                if (document.activeElement.tagName === 'SELECT') {
+                    document.activeElement.blur();
+                }
+            }
+        }, true);  // 捕获阶段处理，确保在事件到达目标元素前处理
 
         // 背景图片选择处理
         document.getElementById('bgImage').addEventListener('change', function(e) {
@@ -1446,42 +1278,77 @@
         function generateObstacles() {
             obstacles = [];
             
-            // 生成第一条黑块
-            generateSingleObstacle();
+            const difficulty = document.getElementById('difficultySelector').value;
             
-            // 生成第二条黑块
-            generateSingleObstacle();
+            // 根据难度级别生成不同数量的黑块
+            let obstacleCount = 0;
+            if (difficulty === 'easy') {
+                obstacleCount = 1; // 简单级别生成1条黑块
+            } else if (difficulty === 'medium') {
+                obstacleCount = 2; // 普通级别生成2条黑块
+            } else if (difficulty === 'hard') {
+                obstacleCount = 3; // 困难级别生成3条黑块
+            }
+            
+            // 生成指定数量的黑块
+            for (let i = 0; i < obstacleCount; i++) {
+                generateSingleObstacle();
+            }
         }
 
         // 生成单条黑块
         function generateSingleObstacle() {
+            // 最大尝试次数，防止死循环
+            const MAX_ATTEMPTS = 50;
+            let attempts = 0;
+            
             // 随机选择起始位置
-            let startX = Math.floor(Math.random() * (tileCount - OBSTACLE_COUNT));
-            let startY = Math.floor(Math.random() * (tileCount - OBSTACLE_COUNT));
+            let startX, startY, isValid = false;
+            let obstaclePositions = [];
             
-            // 随机选择方向（水平或垂直）
-            const isHorizontal = Math.random() > 0.5;
+            while (!isValid && attempts < MAX_ATTEMPTS) {
+                attempts++;
+                obstaclePositions = [];
+                
+                startX = Math.floor(Math.random() * (tileCount - OBSTACLE_COUNT));
+                startY = Math.floor(Math.random() * (tileCount - OBSTACLE_COUNT));
+                
+                // 随机选择方向（水平或垂直）
+                const isHorizontal = Math.random() > 0.5;
+                
+                // 生成连续的黑块位置并检查是否合法
+                isValid = true;
+                for (let i = 0; i < OBSTACLE_COUNT; i++) {
+                    let x, y;
+                    if (isHorizontal) {
+                        x = startX + i;
+                        y = startY;
+                    } else {
+                        x = startX;
+                        y = startY + i;
+                    }
+                    
+                    // 确保不超出边界
+                    if (x >= tileCount || y >= tileCount) {
+                        isValid = false;
+                        break;
+                    }
+                    
+                    // 检查位置是否被占用
+                    if (isPositionOccupied(x, y)) {
+                        isValid = false;
+                        break;
+                    }
+                    
+                    obstaclePositions.push({x, y});
+                }
+            }
             
-            // 生成连续的黑块
-            for (let i = 0; i < OBSTACLE_COUNT; i++) {
-                let x, y;
-                if (isHorizontal) {
-                    x = startX + i;
-                    y = startY;
-                } else {
-                    x = startX;
-                    y = startY + i;
-                }
-                
-                // 确保不超出边界
-                if (x >= tileCount || y >= tileCount) {
-                    break;
-                }
-                
-                // 检查位置是否被占用
-                if (!isPositionOccupied(x, y)) {
-                    obstacles.push({x, y});
-                }
+            // 只有当生成的位置完全合法时，才添加到障碍物列表中
+            if (isValid) {
+                obstacles.push(...obstaclePositions);
+            } else {
+                console.log("无法生成有效的黑块，可能尝试次数不够或空间不足");
             }
         }
 
@@ -1532,76 +1399,113 @@
             canvas.height = 500;
             const ctx = canvas.getContext('2d');
             
-            // 获取游戏背景
-            const gameBackground = new Image();
-            gameBackground.crossOrigin = 'Anonymous';
-            gameBackground.onload = function() {
-                // 绘制背景
-                ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
-                
-                // 添加半透明遮罩
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // 绘制标题
-                ctx.font = 'bold 32px Arial';
-                ctx.fillStyle = '#fff';
-                ctx.textAlign = 'center';
-                ctx.fillText('贪吃蛇游戏', canvas.width / 2, 60);
-                
-                // 绘制得分
-                ctx.font = 'bold 48px Arial';
-                ctx.fillStyle = '#ffd700';
-                ctx.fillText(`得分: ${score}`, canvas.width / 2, 150);
-                
-                // 绘制难度
-                const difficulty = document.getElementById('difficultySelector').value;
-                const difficultyText = {
-                    'easy': '简单模式',
-                    'medium': '中等模式',
-                    'hard': '困难模式'
-                }[difficulty];
-                ctx.font = '24px Arial';
-                ctx.fillStyle = '#fff';
-                ctx.fillText(difficultyText, canvas.width / 2, 200);
-                
-                // 生成二维码
-                const qrCanvas = document.createElement('canvas');
-                qrCanvas.width = 200;
-                qrCanvas.height = 200;
-                const qrCtx = qrCanvas.getContext('2d');
-                
-                // 使用第三方API生成二维码
-                const qrImage = new Image();
-                qrImage.crossOrigin = 'Anonymous';
-                qrImage.onload = function() {
-                    qrCtx.drawImage(qrImage, 0, 0, 200, 200);
+            // 创建渐变背景作为默认背景
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, "#4b6cb7");
+            gradient.addColorStop(1, "#182848");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 尝试获取游戏背景
+            const currentBackground = document.body.style.backgroundImage;
+            let useCustomBackground = false;
+            
+            if (currentBackground && !currentBackground.includes('https://img.freepik.com')) {
+                // 如果使用自定义背景且不是默认背景，则尝试加载
+                useCustomBackground = true;
+                const gameBackground = new Image();
+                gameBackground.crossOrigin = 'Anonymous';
+                gameBackground.onload = function() {
+                    // 绘制背景
+                    ctx.drawImage(gameBackground, 0, 0, canvas.width, canvas.height);
+                    // 添加半透明遮罩
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // 将二维码绘制到主canvas
-                    ctx.drawImage(qrCanvas, (canvas.width - 200) / 2, 250);
-                    
-                    // 添加提示文字
-                    ctx.font = '16px Arial';
-                    ctx.fillStyle = '#fff';
-                    ctx.fillText('扫描二维码开始游戏', canvas.width / 2, 480);
-                    
-                    // 转换为图片并显示
-                    shareImage.src = canvas.toDataURL('image/png');
-                    shareImageContainer.style.display = 'block';
+                    // 完成剩余的绘制工作
+                    completeImageGeneration(ctx, canvas, shareImage, shareImageContainer);
                 };
                 
-                const shareLink = `${window.location.href}?score=${score}&difficulty=${difficulty}`;
-                qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareLink)}`;
+                try {
+                    gameBackground.src = currentBackground.replace(/url\(['"](.+)['"]\)/, '$1');
+                } catch (e) {
+                    console.error('背景图片加载失败:', e);
+                    useCustomBackground = false;
+                }
+            }
+            
+            // 如果不使用自定义背景或背景加载失败，直接完成绘制
+            if (!useCustomBackground) {
+                // 已经创建了渐变背景，添加半透明遮罩
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 完成剩余的绘制工作
+                completeImageGeneration(ctx, canvas, shareImage, shareImageContainer);
+            }
+        }
+
+        // 完成图片生成的辅助函数
+        function completeImageGeneration(ctx, canvas, shareImage, shareImageContainer) {
+            // 绘制标题
+            ctx.font = 'bold 36px Arial';
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.fillText('贪吃蛇游戏', canvas.width / 2, 60);
+            
+            // 绘制得分
+            ctx.font = 'bold 60px Arial';
+            ctx.fillStyle = '#ffd700';
+            ctx.fillText(`得分: ${score}`, canvas.width / 2, 140);
+            
+            // 绘制难度
+            const difficulty = document.getElementById('difficultySelector').value;
+            const difficultyText = {
+                'easy': '简单模式',
+                'medium': '普通模式',
+                'hard': '困难模式'
+            }[difficulty];
+            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = '#fff';
+            ctx.fillText(difficultyText, canvas.width / 2, 190);
+            
+            // 添加二维码说明
+            ctx.font = '18px Arial';
+            ctx.fillStyle = '#fff';
+            ctx.fillText('扫描下方二维码开始游戏', canvas.width / 2, 240);
+            
+            // 使用第三方API生成二维码
+            const shareLink = `${window.location.href.split('?')[0]}?score=${score}&difficulty=${difficulty}`;
+            const qrCodeURL = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(shareLink)}`;
+            
+            const qrImage = new Image();
+            qrImage.crossOrigin = 'Anonymous';
+            qrImage.onload = function() {
+                // 将二维码绘制到主canvas - 居中显示
+                ctx.drawImage(qrImage, (canvas.width - 200) / 2, 260, 200, 200);
+                
+                // 添加底部署名
+                ctx.font = '14px Arial';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.fillText('贪吃蛇 v1.0.6', canvas.width / 2, 480);
+                
+                // 转换为图片并显示
+                shareImage.src = canvas.toDataURL('image/png');
+                shareImageContainer.style.display = 'block';
             };
             
-            // 获取当前背景图片
-            const currentBackground = document.body.style.backgroundImage;
-            if (currentBackground) {
-                gameBackground.src = currentBackground.replace(/url\(['"](.+)['"]\)/, '$1');
-            } else {
-                // 如果没有自定义背景，使用默认背景
-                gameBackground.src = 'https://img.freepik.com/free-vector/gradient-pastel-sky-background_23-2148917404.jpg';
-            }
+            qrImage.onerror = function() {
+                // 二维码加载失败时
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#ff4757';
+                ctx.fillText('二维码生成失败', canvas.width / 2, 350);
+                
+                // 仍然显示图片
+                shareImage.src = canvas.toDataURL('image/png');
+                shareImageContainer.style.display = 'block';
+            };
+            
+            qrImage.src = qrCodeURL;
         }
 
         // 复制分享链接
