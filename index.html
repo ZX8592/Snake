@@ -32,17 +32,6 @@
             z-index: -1;
         }
 
-        .mobile-layout {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            gap: 20px;
-        }
-
         #gameContainer {
             display: flex;
             flex-direction: column;
@@ -56,50 +45,15 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
             box-sizing: border-box;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .controls-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        #settingsPanel,
-        #highScores {
-            width: 100%;
-            margin: 0;
         }
 
         #gameCanvas {
-            width: 100%;
-            height: auto;
-            aspect-ratio: 1;
-        }
-
-        /* 触摸设备优化 */
-        @media (hover: none) {
-            .setting-group select,
-            .setting-group .upload-btn,
-            button {
-                min-height: 44px;
-                padding: 12px;
-            }
-
-            /* 防止iOS设备上的点击延迟 */
-            * {
-                -webkit-tap-highlight-color: transparent;
-            }
-
-            /* 优化移动设备上的滚动体验 */
-            .setting-group,
-            #highScoresList {
-                -webkit-overflow-scrolling: touch;
-            }
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            display: block;
+            margin: 0 auto;
+            touch-action: none; /* 防止触摸事件的默认行为 */
         }
 
         #scoreBoard {
@@ -542,6 +496,156 @@
             font-size: 16px;
             margin-top: 10px;
             opacity: 0.8;
+        }
+
+        /* 移动设备适配 */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            body {
+                padding: 10px;
+                min-height: 100vh;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .mobile-layout {
+                width: 100%;
+                max-width: 400px;
+                display: flex;
+                flex-direction: column;
+                gap: 30px;
+                margin: 0 auto;
+            }
+
+            #gameContainer {
+                width: 100%;
+                margin: 0 auto;
+            }
+
+            .controls-container {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            #settingsPanel,
+            #highScores {
+                width: 100%;
+                margin: 0;
+            }
+
+            /* 调整游戏画布大小 */
+            #gameCanvas {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1;
+            }
+        }
+
+        /* 横屏模式优化 */
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+
+            .mobile-layout {
+                max-width: none;
+                flex-direction: row;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 20px;
+            }
+
+            #gameContainer {
+                flex: 0 0 auto;
+                width: auto;
+            }
+
+            .controls-container {
+                flex: 0 0 auto;
+                width: auto;
+                max-height: 100vh;
+                overflow-y: auto;
+            }
+
+            /* 调整横屏模式下的游戏画布大小 */
+            #gameCanvas {
+                width: 60vw;
+                height: 60vw;
+                max-width: 300px;
+                max-height: 300px;
+            }
+        }
+
+        /* 超小屏幕设备优化 */
+        @media screen and (max-width: 320px) and (orientation: portrait) {
+            body {
+                padding: 5px;
+            }
+
+            .mobile-layout {
+                gap: 20px;
+            }
+
+            #gameContainer {
+                padding: 10px;
+            }
+
+            .controls-container {
+                gap: 20px;
+            }
+
+            /* 调整超小屏幕下的游戏画布大小 */
+            #gameCanvas {
+                width: 90vw;
+                height: 90vw;
+                max-width: 280px;
+                max-height: 280px;
+            }
+        }
+
+        /* 添加触摸设备检测 */
+        @media (hover: none) and (pointer: coarse) {
+            /* 触摸设备特定的样式 */
+            .setting-group select,
+            .setting-group .upload-btn,
+            button {
+                min-height: 44px;
+                padding: 12px;
+            }
+
+            /* 防止iOS设备上的点击延迟 */
+            * {
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            /* 优化移动设备上的滚动体验 */
+            .setting-group,
+            #highScoresList {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        .mobile-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 400px;
         }
     </style>
 </head>
@@ -1092,7 +1196,6 @@
 
         // 页面加载完成后初始化游戏
         window.addEventListener('load', function() {
-            adjustLayout();
             initGame();
         });
 
@@ -1504,41 +1607,6 @@
                 console.error('复制失败:', err);
                 alert('复制失败，请手动复制链接');
             });
-        }
-
-        // 检测是否为移动设备
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        // 检测是否为横屏模式
-        function isLandscape() {
-            return window.innerWidth > window.innerHeight;
-        }
-
-        // 调整布局
-        function adjustLayout() {
-            const mobileLayout = document.querySelector('.mobile-layout');
-            const gameContainer = document.getElementById('gameContainer');
-            const controlsContainer = document.querySelector('.controls-container');
-            
-            if (isMobileDevice()) {
-                if (isLandscape()) {
-                    // 横屏模式
-                    mobileLayout.style.flexDirection = 'row';
-                    mobileLayout.style.justifyContent = 'center';
-                    mobileLayout.style.alignItems = 'flex-start';
-                    gameContainer.style.width = 'auto';
-                    controlsContainer.style.width = 'auto';
-                } else {
-                    // 竖屏模式
-                    mobileLayout.style.flexDirection = 'column';
-                    mobileLayout.style.justifyContent = 'flex-start';
-                    mobileLayout.style.alignItems = 'center';
-                    gameContainer.style.width = '100%';
-                    controlsContainer.style.width = '100%';
-                }
-            }
         }
     </script>
 </body>
