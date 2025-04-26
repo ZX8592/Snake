@@ -288,34 +288,35 @@
             transform: translate(-50%, -50%);
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(8px);
-            padding: 40px 30px; /* 增加内边距 */
+            padding: 30px 20px;
             border-radius: 15px;
             text-align: center;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
             z-index: 1000;
-            min-width: 350px; /* 增加最小宽度 */
+            min-width: 280px;
+            max-width: 90%;
             transition: all 0.3s ease;
         }
 
         #gameOverDialog h2 {
-            margin: 0 0 20px 0;
+            margin: 0 0 15px 0;
             color: #fff;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            font-size: 32px; /* 增大标题字号 */
+            font-size: 28px;
         }
 
         #gameOverDialog p {
-            margin: 10px 0;
+            margin: 8px 0;
             color: #fff;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-            font-size: 18px; /* 增大描述文字字号 */
+            font-size: 16px;
         }
 
         #gameOverDialog .score {
-            font-size: 60px; /* 从之前的42px调大到60px */
+            font-size: 48px;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 15px 0;
             color: #ffd700;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
@@ -324,22 +325,16 @@
             color: #ffd700;
             font-weight: bold;
             animation: pulse 1.5s infinite;
-            font-size: 22px; /* 从之前的18px增大到22px */
-            margin: 15px 0; /* 增加上下边距 */
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            font-size: 18px;
+            margin: 10px 0;
         }
 
         /* 游戏结束对话框按钮样式 */
         #gameOverDialog .button-group {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-top: 30px;
+            gap: 20px;
+            margin-top: 20px;
             margin-bottom: 10px;
         }
 
@@ -349,8 +344,8 @@
             color: #fff;
             padding: 0;
             border-radius: 50%;
-            width: 64px;
-            height: 64px;
+            width: 56px;
+            height: 56px;
             cursor: pointer;
             transition: all 0.3s ease;
             backdrop-filter: blur(5px);
@@ -360,25 +355,19 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        #gameOverDialog button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 6px 16px rgba(31, 38, 135, 0.3);
-            transform: translateY(-3px);
-        }
-
         #gameOverDialog button svg {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             fill: white;
             filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.3));
         }
 
         #gameOverDialog .button-tooltip {
             position: absolute;
-            bottom: -30px;
+            bottom: -25px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 14px;
+            font-size: 12px;
             white-space: nowrap;
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -387,10 +376,149 @@
             pointer-events: none;
         }
 
-        #gameOverDialog button:hover .button-tooltip {
-            opacity: 1;
+        /* 横屏模式优化 */
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            #gameOverDialog {
+                padding: 40px 30px;
+                min-width: 350px;
+                max-width: 80%;
+            }
+            
+            #gameOverDialog h2 {
+                font-size: 32px;
+                margin-bottom: 20px;
+            }
+            
+            #gameOverDialog p {
+                font-size: 18px;
+                margin: 10px 0;
+            }
+            
+            #gameOverDialog .score {
+                font-size: 60px;
+                margin: 20px 0;
+            }
+            
+            #gameOverDialog .newRecord {
+                font-size: 22px;
+                margin: 15px 0;
+            }
+            
+            #gameOverDialog .button-group {
+                gap: 30px;
+                margin-top: 30px;
+            }
+            
+            #gameOverDialog button {
+                width: 64px;
+                height: 64px;
+            }
+            
+            #gameOverDialog button svg {
+                width: 32px;
+                height: 32px;
+            }
+            
+            #gameOverDialog .button-tooltip {
+                font-size: 14px;
+                bottom: -30px;
+            }
         }
-        
+
+        /* 移动设备优化 */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            #gameOverDialog {
+                padding: 25px 15px;
+                min-width: 250px;
+            }
+            
+            #gameOverDialog h2 {
+                font-size: 24px;
+                margin-bottom: 12px;
+            }
+            
+            #gameOverDialog p {
+                font-size: 14px;
+                margin: 6px 0;
+            }
+            
+            #gameOverDialog .score {
+                font-size: 42px;
+                margin: 12px 0;
+            }
+            
+            #gameOverDialog .newRecord {
+                font-size: 16px;
+                margin: 8px 0;
+            }
+            
+            #gameOverDialog .button-group {
+                gap: 15px;
+                margin-top: 15px;
+            }
+            
+            #gameOverDialog button {
+                width: 48px;
+                height: 48px;
+            }
+            
+            #gameOverDialog button svg {
+                width: 24px;
+                height: 24px;
+            }
+            
+            #gameOverDialog .button-tooltip {
+                font-size: 11px;
+                bottom: -22px;
+            }
+        }
+
+        /* 移动设备优化 */
+        @media screen and (max-width: 768px) {
+            #gameOverDialog button {
+                width: 56px;
+                height: 56px;
+            }
+            
+            #gameOverDialog button svg {
+                width: 28px;
+                height: 28px;
+            }
+            
+            #gameOverDialog .button-group {
+                gap: 24px;
+            }
+            
+            #gameOverDialog .score {
+                font-size: 48px; /* 移动设备上稍微小一点 */
+            }
+            
+            #gameOverDialog h2 {
+                font-size: 28px;
+            }
+            
+            #gameOverDialog p {
+                font-size: 16px;
+            }
+            
+            #shareImageContainer .image-wrapper {
+                padding: 15px;
+                max-width: 95%;
+                margin: 10px;
+            }
+            
+            #shareImageContainer .copy-tooltip {
+                font-size: 12px;
+                padding: 6px 12px;
+                bottom: 5px;
+            }
+            
+            #shareImageContainer .click-outside-hint {
+                font-size: 12px;
+                bottom: 5px;
+            }
+        }
+
         #gameOverDialog .button-container {
             position: relative;
             margin-bottom: 30px;
