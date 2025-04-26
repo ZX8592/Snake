@@ -130,19 +130,6 @@
             order: 3;
         }
 
-        #highScores {
-            padding: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(8px);
-            width: 230px;
-            box-sizing: border-box;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            order: 1;
-        }
-
         #settingsPanel h3, #highScores h3 {
             margin: 0 0 15px 0;
             text-align: center;
@@ -195,6 +182,27 @@
             display: none;
         }
 
+        .setting-group input[type="text"] {
+            width: 100%;
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            backdrop-filter: blur(5px);
+            box-sizing: border-box;
+        }
+
+        .setting-group input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .setting-group input[type="text"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+
         .setting-group .toggle-container {
             display: flex;
             align-items: center;
@@ -209,6 +217,19 @@
             width: 20px;
             height: 20px;
             cursor: pointer;
+        }
+
+        #highScores {
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            width: 230px;
+            box-sizing: border-box;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            order: 1;
         }
 
         #highScoresList {
@@ -946,7 +967,7 @@
         <h2>游戏结束</h2>
         <p>你的得分</p>
         <div class="score" id="finalScore">0</div>
-        <p id="newRecordMessage" class="newRecord" style="display: none;">🎉 恭喜打破记录 🎉</p>
+        <p id="newRecordMessage" class="newRecord" style="display: none;">🎉 恭喜打破本地记录 🎉</p>
         <div class="button-group">
             <div class="button-container">
                 <button onclick="resetGame()">
@@ -992,6 +1013,10 @@
     <div id="settingsPanel">
         <h3>游戏设置</h3>
         <div class="setting-group">
+            <label>玩家名称：</label>
+            <input type="text" id="playerName" placeholder="输入你的名字" maxlength="10">
+        </div>
+        <div class="setting-group">
             <label>背景图片：</label>
             <label class="upload-btn" for="bgImage">上传图片</label>
             <input type="file" id="bgImage" accept="image/*">
@@ -1020,6 +1045,15 @@
     </div>
 
     <script>
+        // ========= JSONBin.io 配置 ===========
+        // 替换为你自己的JSONBin.io配置
+        const JSONBIN_BIN_ID = "680cd85e8561e97a50080950"; // 例如: 65ecbd83dc7465401897fc5d
+        const JSONBIN_API_KEY = "$2a$10$GSZyXiRck9kTuvtXcaY2meuk6RZ1jHC0vi35aXsFg0QLbTOXrxAgO"; // 例如: $2a$10$xxxxxxxxxxxxxxxxxxxxxxxx
+        const JSONBIN_API_URL = "https://api.jsonbin.io/v3/b";
+        
+        // 在线排行榜始终启用
+        let isOnlineLeaderboardEnabled = true;
+        
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
@@ -1044,7 +1078,7 @@
         const difficultySettings = {
             easy: { baseSpeed: 150, speedIncrease: 0.985, scoreMultiplier: 1 },
             medium: { baseSpeed: 120, speedIncrease: 0.985, scoreMultiplier: 1.5 },
-            hard: { baseSpeed: 90, speedIncrease: 0.985, scoreMultiplier: 2 }
+            hard: { baseSpeed: 100, speedIncrease: 0.985, scoreMultiplier: 2 }
         };
 
         // 音频上下文和音效
@@ -1371,8 +1405,8 @@
                 foodY = newPos.y;
                 
                 // 检查分数是否跨越了200的整数倍边界
-                const oldScoreDiv = Math.floor(oldScore / 200);
-                const newScoreDiv = Math.floor(score / 200);
+                const oldScoreDiv = Math.floor(oldScore / 150);
+                const newScoreDiv = Math.floor(score / 150);
                 if (newScoreDiv > oldScoreDiv && specialFoodX === -1) {
                     // 在跨越200整数倍时生成特殊食物
                     console.log(`跨越200整数倍: ${oldScore} -> ${score}, 生成特殊食物`);
@@ -1468,9 +1502,25 @@
             // 更新最终得分
             finalScore.textContent = score;
             
-            // 检查是否打破记录
-            const isNewRecord = highScores.length === 0 || score > highScores[0];
-            newRecordMessage.style.display = isNewRecord ? 'block' : 'none';
+            // 获取本地高分记录
+            let localHighScores = JSON.parse(localStorage.getItem('snakeHighScores')) || [];
+            
+            // 转换旧格式高分记录
+            localHighScores = localHighScores.map(record => {
+                if (typeof record === 'number') {
+                    return { score: record };
+                }
+                return record;
+            });
+            
+            // 按分数排序
+            localHighScores.sort((a, b) => b.score - a.score);
+            
+            // 检查是否打破本地记录
+            const isNewLocalRecord = localHighScores.length === 0 || score > localHighScores[0].score;
+            
+            // 显示或隐藏新纪录提示
+            newRecordMessage.style.display = isNewLocalRecord ? 'block' : 'none';
             
             // 显示对话框
             dialog.style.display = 'block';
@@ -1643,6 +1693,12 @@
             // 初始化音乐设置
             initMusicSettings();
             
+            // 初始化玩家名字
+            initPlayerName();
+            
+            // 初始化在线高分榜设置
+            initOnlineLeaderboard();
+            
             // 预加载背景音乐
             preloadBgMusic();
             
@@ -1712,6 +1768,127 @@
             
             // 开始游戏循环
             gameLoop();
+        }
+        
+        // 初始化在线高分榜
+        function initOnlineLeaderboard() {
+            // 确保在线高分榜始终启用，无需用户设置
+            isOnlineLeaderboardEnabled = true;
+            
+            // 初始时获取一次在线高分榜数据以显示
+            fetchOnlineHighScores().then(scores => {
+                if (scores && scores.length > 0) {
+                    console.log('成功获取在线高分榜数据，共 ' + scores.length + ' 条记录');
+                } else {
+                    console.log('成功连接到在线高分榜，但暂无数据');
+                }
+            }).catch(error => {
+                console.error('初始化在线高分榜时出错:', error);
+            });
+        }
+        
+        // 从JSONBin获取在线高分榜数据
+        async function fetchOnlineHighScores() {
+            if (!isOnlineLeaderboardEnabled || !JSONBIN_BIN_ID || !JSONBIN_API_KEY) {
+                return []; // 未启用或未配置正确时返回空数组
+            }
+            
+            try {
+                const response = await fetch(`${JSONBIN_API_URL}/${JSONBIN_BIN_ID}/latest`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': JSONBIN_API_KEY
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.error(`获取在线高分榜失败: ${response.status} ${response.statusText}`);
+                    return [];
+                }
+                
+                const data = await response.json();
+                // 如果是首次使用，data.record可能为空或没有highScores字段
+                return (data.record && data.record.highScores) ? data.record.highScores : [];
+            } catch (error) {
+                console.error('获取在线高分榜出错:', error);
+                return [];
+            }
+        }
+        
+        // 提交分数到在线高分榜
+        async function submitScoreToOnline(scoreRecord) {
+            if (!isOnlineLeaderboardEnabled || !JSONBIN_BIN_ID || !JSONBIN_API_KEY) {
+                return false; // 未启用或未配置正确时返回失败
+            }
+            
+            try {
+                // 先获取当前的在线高分榜
+                const currentHighScores = await fetchOnlineHighScores();
+                
+                // 添加新记录
+                currentHighScores.push(scoreRecord);
+                
+                // 排序并只保留前20名
+                const updatedHighScores = currentHighScores
+                    .sort((a, b) => {
+                        const scoreA = typeof a === 'number' ? a : a.score;
+                        const scoreB = typeof b === 'number' ? b : b.score;
+                        return scoreB - scoreA;
+                    })
+                    .slice(0, 20);
+                
+                // 提交更新后的高分榜
+                const response = await fetch(`${JSONBIN_API_URL}/${JSONBIN_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
+                    },
+                    body: JSON.stringify({ highScores: updatedHighScores })
+                });
+                
+                if (!response.ok) {
+                    console.error(`提交分数失败: ${response.status} ${response.statusText}`);
+                    return false;
+                }
+                
+                console.log('分数已成功提交到在线高分榜!');
+                return true;
+            } catch (error) {
+                console.error('提交分数出错:', error);
+                return false;
+            }
+        }
+        
+        // 初始化玩家名字
+        function initPlayerName() {
+            // 从本地存储获取保存的玩家名字
+            const savedName = localStorage.getItem('snakePlayerName');
+            if (savedName) {
+                document.getElementById('playerName').value = savedName;
+            } else {
+                document.getElementById('playerName').value = '玩家' + Math.floor(Math.random() * 1000);
+            }
+            
+            // 添加事件监听器，保存玩家名字
+            document.getElementById('playerName').addEventListener('change', function() {
+                const playerName = this.value.trim();
+                if (playerName) {
+                    localStorage.setItem('snakePlayerName', playerName);
+                }
+            });
+        }
+        
+        // 获取当前玩家名字
+        function getPlayerName() {
+            const nameInput = document.getElementById('playerName');
+            let playerName = nameInput.value.trim();
+            if (!playerName) {
+                playerName = '玩家' + Math.floor(Math.random() * 1000);
+                nameInput.value = playerName;
+                localStorage.setItem('snakePlayerName', playerName);
+            }
+            return playerName;
         }
 
         // 尝试播放背景音乐的函数
@@ -1830,19 +2007,219 @@
         }
 
         // 更新高分榜
-        function updateHighScores() {
-            highScores.push(score);
-            highScores.sort((a, b) => b - a);
-            highScores = highScores.slice(0, 10); // 只保留前10名
-            localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
-            
+        async function updateHighScores() {
+            try {
+                // 获取当前玩家的名称
+                const playerName = getPlayerName();
+                
+                // 创建带有玩家名字的分数记录
+                const scoreRecord = {
+                    name: playerName,
+                    score: score,
+                    difficulty: document.getElementById('difficultySelector').value,
+                    date: new Date().toISOString()
+                };
+                
+                // 处理本地高分榜
+                let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || [];
+                
+                // 当本地分数大于0时才添加记录
+                if (score > 0) {
+                    // 添加新记录
+                    highScores.push(scoreRecord);
+                    
+                    // 按分数排序
+                    highScores.sort((a, b) => {
+                        // 如果是简单的数字(旧版本)，转换为对象
+                        const scoreA = typeof a === 'number' ? a : a.score;
+                        const scoreB = typeof b === 'number' ? b : b.score;
+                        return scoreB - scoreA;
+                    });
+                    
+                    // 只保留前10名
+                    highScores = highScores.slice(0, 10);
+                    
+                    // 保存回localStorage
+                    localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
+                    
+                    // 如果启用了在线高分榜，提交分数
+                    if (isOnlineLeaderboardEnabled && JSONBIN_BIN_ID && JSONBIN_API_KEY) {
+                        // 异步提交，不等待结果
+                        submitScoreToOnline(scoreRecord).then(success => {
+                            if (success) {
+                                console.log('分数已成功提交到在线高分榜');
+                            }
+                        });
+                    }
+                }
+                
+                // 更新高分榜显示
+                await updateHighScoresDisplay();
+            } catch (error) {
+                console.error('更新高分榜时出错:', error);
+            }
+        }
+        
+        // 更新高分榜显示
+        async function updateHighScoresDisplay() {
             const highScoresList = document.getElementById('highScoresList');
             highScoresList.innerHTML = '';
-            highScores.forEach((score, index) => {
-                const li = document.createElement('li');
-                li.textContent = `${index + 1}. ${score}分`;
-                highScoresList.appendChild(li);
-            });
+            
+            // 显示加载中
+            const loadingItem = document.createElement('li');
+            loadingItem.textContent = '加载中...';
+            highScoresList.appendChild(loadingItem);
+            
+            try {
+                // 获取在线高分榜
+                let onlineScores = await fetchOnlineHighScores();
+                
+                // 获取本地高分榜
+                let localScores = JSON.parse(localStorage.getItem('snakeHighScores')) || [];
+                
+                // 清空加载提示
+                highScoresList.innerHTML = '';
+                
+                // 合并在线和本地高分榜数据
+                let displayScores = [...onlineScores];
+                
+                // 如果没有任何记录
+                if (displayScores.length === 0 && localScores.length === 0) {
+                    const emptyItem = document.createElement('li');
+                    emptyItem.textContent = '暂无记录';
+                    highScoresList.appendChild(emptyItem);
+                    return;
+                }
+                
+                // 找出本地最高分
+                if (localScores.length > 0) {
+                    // 按分数排序本地分数
+                    localScores.sort((a, b) => {
+                        const scoreA = typeof a === 'number' ? a : a.score;
+                        const scoreB = typeof b === 'number' ? b : b.score;
+                        return scoreB - scoreA;
+                    });
+                    
+                    // 获取本地最高分记录
+                    const localBest = localScores[0];
+                    
+                    // 创建本地最高分的显示项
+                    const localBestItem = document.createElement('li');
+                    localBestItem.className = 'local-best';
+                    localBestItem.style.borderBottom = '2px dashed rgba(255, 255, 255, 0.3)';
+                    localBestItem.style.marginBottom = '8px';
+                    localBestItem.style.paddingBottom = '8px';
+                    
+                    // 添加文本
+                    if (typeof localBest === 'number') {
+                        localBestItem.textContent = `本地最佳: ${localBest}分`;
+                    } else {
+                        localBestItem.textContent = `本地最佳: ${localBest.score}分`;
+                    }
+                    
+                    // 显示在顶部
+                    highScoresList.appendChild(localBestItem);
+                }
+                
+                // 添加在线高分记录
+                if (displayScores.length > 0) {
+                    // 添加在线高分记录标题（如果有的话）
+                    if (localScores.length > 0) {
+                        const onlineTitle = document.createElement('li');
+                        onlineTitle.style.fontSize = '14px';
+                        onlineTitle.style.opacity = '0.7';
+                        onlineTitle.style.marginBottom = '5px';
+                        onlineTitle.style.textAlign = 'center';
+                        onlineTitle.textContent = '在线排行';
+                        highScoresList.appendChild(onlineTitle);
+                    }
+                    
+                    // 添加在线高分记录（最多显示9条）
+                    displayScores.slice(0, 9).forEach((record, index) => {
+                        const li = document.createElement('li');
+                        
+                        // 如果是旧版本的简单数字，使用默认名称
+                        if (typeof record === 'number') {
+                            li.textContent = `匿名: ${record}分`;
+                        } else {
+                            li.textContent = `${record.name || '匿名'}: ${record.score}分`;
+                        }
+                        
+                        highScoresList.appendChild(li);
+                    });
+                }
+                
+            } catch (error) {
+                console.error('显示高分榜时出错:', error);
+                highScoresList.innerHTML = '';
+                
+                // 显示本地高分榜作为备用
+                let localScores = JSON.parse(localStorage.getItem('snakeHighScores')) || [];
+                if (localScores.length > 0) {
+                    // 按分数排序
+                    localScores.sort((a, b) => {
+                        const scoreA = typeof a === 'number' ? a : a.score;
+                        const scoreB = typeof b === 'number' ? b : b.score;
+                        return scoreB - scoreA;
+                    });
+                    
+                    // 显示本地高分
+                    localScores.forEach((record, index) => {
+                        const li = document.createElement('li');
+                        
+                        // 如果是旧版本的简单数字，使用默认名称
+                        if (typeof record === 'number') {
+                            li.textContent = `匿名: ${record}分`;
+                        } else {
+                            li.textContent = `${record.name || '匿名'}: ${record.score}分`;
+                        }
+                        
+                        highScoresList.appendChild(li);
+                    });
+                    
+                    // 添加备用说明
+                    const fallbackNote = document.createElement('li');
+                    fallbackNote.style.marginTop = '10px';
+                    fallbackNote.style.fontSize = '12px';
+                    fallbackNote.style.opacity = '0.7';
+                    fallbackNote.style.fontStyle = 'italic';
+                    fallbackNote.textContent = '在线数据加载失败，显示本地记录';
+                    highScoresList.appendChild(fallbackNote);
+                } else {
+                    const errorItem = document.createElement('li');
+                    errorItem.textContent = '加载失败';
+                    highScoresList.appendChild(errorItem);
+                }
+            }
+        }
+
+        // 清除高分榜
+        async function clearHighScores() {
+            // 只清除本地高分榜
+            localStorage.removeItem('snakeHighScores');
+            console.log('已清除本地高分榜');
+            
+            // 更新高分榜显示（显示在线高分榜）
+            await updateHighScoresDisplay();
+            
+            // 显示清除成功的提示
+            const dialog = document.getElementById('gameOverDialog');
+            const originalDisplay = dialog.style.display;
+            const originalContent = dialog.innerHTML;
+            
+            dialog.style.display = 'block';
+            dialog.innerHTML = `
+                <h2>清除记录</h2>
+                <p>本地高分榜已成功清除！</p>
+                <p style="font-size:14px;color:#aaa">在线高分榜保持不变</p>
+                <button onclick="closeDialog()">确定</button>
+            `;
+            
+            // 添加关闭对话框的函数
+            window.closeDialog = function() {
+                dialog.style.display = originalDisplay;
+                dialog.innerHTML = originalContent;
+            };
         }
 
         // 更新速度
@@ -2067,31 +2444,6 @@
             });
         }
 
-        // 清除高分榜
-        function clearHighScores() {
-            highScores = [];
-            localStorage.removeItem('snakeHighScores');
-            updateHighScores();
-            
-            // 显示清除成功的提示
-            const dialog = document.getElementById('gameOverDialog');
-            const originalDisplay = dialog.style.display;
-            const originalContent = dialog.innerHTML;
-            
-            dialog.style.display = 'block';
-            dialog.innerHTML = `
-                <h2>清除记录</h2>
-                <p>高分榜已成功清除！</p>
-                <button onclick="closeDialog()">确定</button>
-            `;
-            
-            // 添加关闭对话框的函数
-            window.closeDialog = function() {
-                dialog.style.display = originalDisplay;
-                dialog.innerHTML = originalContent;
-            };
-        }
-
         // 生成分享图片
         function generateShareImage() {
             const shareImageContainer = document.getElementById('shareImageContainer');
@@ -2158,63 +2510,58 @@
                 ctx.textAlign = 'center';
                 ctx.fillText('贪吃蛇游戏', canvas.width / 2, 60);
                 
-                // 绘制得分
-            ctx.font = 'bold 60px Arial';
-                ctx.fillStyle = '#ffd700';
-            ctx.fillText(`得分: ${score}`, canvas.width / 2, 140);
-                
-                // 绘制难度
-                const difficulty = document.getElementById('difficultySelector').value;
-                const difficultyText = {
-                    'easy': '简单模式',
-                'medium': '普通模式',
-                    'hard': '困难模式'
-                }[difficulty];
-            ctx.font = 'bold 24px Arial';
+                // 获取玩家名称
+                const playerName = getPlayerName();
+            
+                // 绘制玩家名称
+                ctx.font = 'bold 24px Arial';
                 ctx.fillStyle = '#fff';
-            ctx.fillText(difficultyText, canvas.width / 2, 190);
+                ctx.fillText(playerName, canvas.width / 2, 100);
+            
+                // 绘制得分
+                ctx.font = 'bold 60px Arial';
+                ctx.fillStyle = '#ffd700';
+                ctx.fillText(`得分: ${score}`, canvas.width / 2, 160);
                 
-            // 添加二维码说明
-            ctx.font = '18px Arial';
-            ctx.fillStyle = '#fff';
-            ctx.fillText('扫描下方二维码开始游戏', canvas.width / 2, 240);
+                // 获取当前难度（仅用于生成链接，不显示）
+                const difficulty = document.getElementById('difficultySelector').value;
                 
                 // 使用第三方API生成二维码
-            const shareLink = `${window.location.href.split('?')[0]}?score=${score}&difficulty=${difficulty}`;
-            const qrCodeURL = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(shareLink)}`;
+                const shareLink = `${window.location.href.split('?')[0]}?score=${score}&difficulty=${difficulty}`;
+                const qrCodeURL = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(shareLink)}`;
             
                 const qrImage = new Image();
                 qrImage.crossOrigin = 'Anonymous';
                 qrImage.onload = function() {
-                // 将二维码绘制到主canvas - 居中显示
-                ctx.drawImage(qrImage, (canvas.width - 200) / 2, 260, 200, 200);
+                    // 将二维码绘制到主canvas - 居中显示
+                    ctx.drawImage(qrImage, (canvas.width - 200) / 2, 220, 200, 200);
                     
-                // 添加底部署名
-                ctx.font = '14px Arial';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                ctx.fillText('贪吃蛇 v1.1.0', canvas.width / 2, 480);
+                    // 添加二维码说明（放在二维码下方）
+                    ctx.font = '18px Arial';
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText('扫描二维码开始游戏', canvas.width / 2, 440);
                     
                     // 转换为图片并显示
                     shareImage.src = canvas.toDataURL('image/png');
-                // 隐藏游戏结束对话框，显示分享图片界面
-                gameOverDialog.style.display = 'none';
-                shareImageContainer.style.display = 'flex'; // 使用flex布局
+                    // 隐藏游戏结束对话框，显示分享图片界面
+                    gameOverDialog.style.display = 'none';
+                    shareImageContainer.style.display = 'flex'; // 使用flex布局
                 
-                // 重置提示文本
-                const tooltip = document.getElementById('copyTooltip');
-                tooltip.textContent = '点击复制图片';
-                tooltip.style.opacity = '0';
+                    // 重置提示文本
+                    const tooltip = document.getElementById('copyTooltip');
+                    tooltip.textContent = '点击复制图片';
+                    tooltip.style.opacity = '0';
                 
-                // 检测是否支持新的剪贴板API
-                if (!navigator.clipboard || !navigator.clipboard.write) {
-                    document.getElementById('shareImageContainer').setAttribute('data-clipboard-fallback', 'true');
-                    // 更新提示文本说明仅支持复制链接
-                    const container = document.getElementById('shareImageContainer');
-                    if (container) {
-                        container.classList.add('fallback-mode');
+                    // 检测是否支持新的剪贴板API
+                    if (!navigator.clipboard || !navigator.clipboard.write) {
+                        document.getElementById('shareImageContainer').setAttribute('data-clipboard-fallback', 'true');
+                        // 更新提示文本说明仅支持复制链接
+                        const container = document.getElementById('shareImageContainer');
+                        if (container) {
+                            container.classList.add('fallback-mode');
+                        }
                     }
-                }
-            };
+                };
             
             qrImage.onerror = function() {
                 // 二维码加载失败时
