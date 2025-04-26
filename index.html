@@ -427,49 +427,144 @@
 
         /* 移动设备优化 */
         @media screen and (max-width: 768px) and (orientation: portrait) {
-            #gameOverDialog {
-                padding: 25px 15px;
-                min-width: 250px;
+            body {
+                padding: 10px;
+                justify-content: flex-start;
             }
-            
-            #gameOverDialog h2 {
-                font-size: 24px;
-                margin-bottom: 12px;
+
+            .container {
+                width: 100%;
+                max-width: 100%;
             }
-            
-            #gameOverDialog p {
-                font-size: 14px;
-                margin: 6px 0;
+
+            .title {
+                margin-bottom: 10px;
             }
-            
-            #gameOverDialog .score {
-                font-size: 42px;
-                margin: 12px 0;
+
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 10px;
             }
-            
-            #gameOverDialog .newRecord {
-                font-size: 16px;
-                margin: 8px 0;
-            }
-            
-            #gameOverDialog .button-group {
+
+            .mobile-layout {
+                flex-direction: column;
+                align-items: center;
                 gap: 15px;
+                width: 100%;
+            }
+
+            #gameContainer, #settingsPanel, #highScores {
+                width: 100%;
+                max-width: 400px;
+                margin: 0 auto;
+                padding: 15px;
+                box-sizing: border-box;
+            }
+
+            #gameCanvas {
+                width: 100%;
+                max-width: 350px;
+                height: auto;
+                aspect-ratio: 1;
+                margin: 0 auto;
+                display: block;
+            }
+
+            button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            #highScores, #settingsPanel {
+                min-width: unset;
+                width: 100%;
+            }
+            
+            .setting-group .upload-btn {
+                display: block;
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+                padding: 10px;
+                margin-bottom: 5px;
+            }
+            
+            #scoreBoard {
+                width: 100%; /* 在移动设备上占满容器宽度 */
+                max-width: 350px; /* 与游戏画布保持一致 */
+                text-align: center;
+                margin-bottom: 15px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            
+            #speedInfo {
+                width: 100%; /* 在移动设备上占满容器宽度 */
+                max-width: 350px; /* 与游戏画布保持一致 */
+                text-align: center;
                 margin-top: 15px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            
+            #pauseText {
+                font-size: 36px;
+            }
+            
+            #pauseText small {
+                font-size: 14px;
             }
             
             #gameOverDialog button {
-                width: 48px;
-                height: 48px;
+                width: 56px;
+                height: 56px;
             }
             
             #gameOverDialog button svg {
-                width: 24px;
-                height: 24px;
+                width: 28px;
+                height: 28px;
             }
             
-            #gameOverDialog .button-tooltip {
-                font-size: 11px;
-                bottom: -22px;
+            #gameOverDialog .button-group {
+                gap: 24px;
+            }
+            
+            #gameOverDialog .score {
+                font-size: 36px;
+            }
+            
+            #gameOverDialog .share-image-container img {
+                max-width: 90%;
+            }
+            
+            #gameOverDialog .share-image-container::before {
+                font-size: 12px;
+                top: -22px;
+                padding: 4px 10px;
+            }
+            
+            #gameOverDialog .share-image-container .copy-tooltip {
+                font-size: 12px;
+                padding: 6px 12px;
+                transform: translate(-50%, 30px);
+            }
+
+            /* 修改竖屏模式下的布局顺序 */
+            .mobile-layout {
+                flex-direction: column;
+            }
+
+            #highScores {
+                order: 3; /* 将高分榜移到设置界面下方 */
+                margin-top: 15px;
+            }
+
+            #gameContainer {
+                order: 1;
+            }
+
+            #settingsPanel {
+                order: 2;
             }
         }
 
