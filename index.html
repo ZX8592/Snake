@@ -17,6 +17,7 @@
             box-sizing: border-box;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
         }
@@ -32,14 +33,26 @@
             z-index: -1;
         }
 
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
         .mobile-layout {
             display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
+            gap: 30px;
+            margin: 0 auto;
             width: 100%;
-            max-width: 1200px;
-            gap: 40px;
+            justify-content: center;
         }
 
         #gameContainer {
@@ -398,53 +411,58 @@
         }
 
         /* 移动设备专用样式 */
-        @media screen and (max-width: 768px) and (orientation: portrait) {
+        @media screen and (max-width: 768px) {
             body {
                 padding: 10px;
                 justify-content: flex-start;
             }
 
+            .container {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .title {
+                margin-bottom: 10px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 10px;
+            }
+
             .mobile-layout {
                 flex-direction: column;
                 align-items: center;
-                gap: 20px;
+                gap: 15px;
+                width: 100%;
             }
 
-            #gameContainer {
+            #gameContainer, #settingsPanel, #highScores {
                 width: 100%;
                 max-width: 400px;
-                order: 1;
-                margin: 0;
-            }
-
-            #settingsPanel, #highScores {
-                width: 100%;
-                max-width: 400px;
-            }
-            
-            #highScores {
-                order: 2;
-            }
-            
-            #settingsPanel {
-                order: 3;
+                margin: 0 auto;
             }
 
             #gameCanvas {
                 width: 100%;
-                height: auto;
-                aspect-ratio: 1;
                 max-width: 350px;
+                height: auto;
                 max-height: 350px;
+                margin: 0 auto;
             }
 
-            .button-group {
-                flex-direction: column;
+            button {
+                padding: 8px 12px;
+                font-size: 14px;
             }
-            
-            .button-group button {
-                width: 100%;
-                margin: 5px 0;
+
+            #highScores {
+                min-width: unset;
+            }
+
+            #settingsPanel {
+                min-width: unset;
             }
 
             #pauseText {
@@ -490,7 +508,7 @@
         <h2>游戏结束</h2>
         <p>你的得分：</p>
         <div class="score" id="finalScore">0</div>
-        <p id="newRecordMessage" class="newRecord" style="display: none;">🎉 恭喜打破记录！ 🎉</p>
+        <p id="newRecordMessage" class="newRecord" style="display: none;">🎉 恭喜打破记录 🎉</p>
         <div class="button-group">
             <button onclick="resetGame()">再来一局</button>
             <button class="share-button" onclick="generateShareImage()">分享成绩</button>
@@ -566,8 +584,8 @@
         // 难度设置
         const difficultySettings = {
             easy: { baseSpeed: 150, speedIncrease: 0.985, scoreMultiplier: 1 },
-            medium: { baseSpeed: 100, speedIncrease: 0.985, scoreMultiplier: 1.5 },
-            hard: { baseSpeed: 70, speedIncrease: 0.985, scoreMultiplier: 2 }
+            medium: { baseSpeed: 120, speedIncrease: 0.985, scoreMultiplier: 1.5 },
+            hard: { baseSpeed: 90, speedIncrease: 0.985, scoreMultiplier: 2 }
         };
 
         // 初始化游戏速度
@@ -1180,7 +1198,7 @@
         function updateHighScores() {
             highScores.push(score);
             highScores.sort((a, b) => b - a);
-            highScores = highScores.slice(0, 5); // 只保留前5名
+            highScores = highScores.slice(0, 10); // 只保留前10名
             localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
             
             const highScoresList = document.getElementById('highScoresList');
